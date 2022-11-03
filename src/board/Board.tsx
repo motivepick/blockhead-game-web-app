@@ -11,6 +11,7 @@ const Board = ({ data }: TBoard) => {
     const [field, setField] = useState(data)
     const [lastSetLetter, setLastSetLetter] = useState({ id: '', value: '' })
     const [word, setWord] = useState([])
+    const [usedWords, setUsedWords] = useState([data[2].join("")])
 
     const updateState = event => {
         const [x, y] = event.target.id
@@ -36,7 +37,8 @@ const Board = ({ data }: TBoard) => {
     }
 
     const onSubmit = () => {
-        console.log('submit')
+        setUsedWords([...usedWords, word.join("")])
+        setWord([])
     }
 
     return <>

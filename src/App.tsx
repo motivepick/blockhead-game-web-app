@@ -1,11 +1,11 @@
 import React from 'react'
 import Board from "./board/Board";
 
-const field = [ "Т....", "ЕГТЫН", "БАЛДА", ".ФЛАХ", "....." ]
+const field = [ "Т....", "ЕГТЫН", "БАЛДА", ".ФЛАХ", "....." ].map(row => row.split(""))
 
 const App = () => <>
     <h1>Hello</h1>
-    <Board data={field.map(row => row.split(""))}/>
+    <Board data={field}/>
 </>
 
 export default App

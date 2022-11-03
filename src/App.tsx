@@ -1,7 +1,7 @@
 import React from 'react'
-import Board from "./board/Board";
+import Board from './board/Board'
 
-const field = [ "Т....", "ЕГТЫН", "БАЛДА", ".ФЛАХ", "....." ].map(row => row.split(""))
+const field = ['Т....', 'ЕГТЫН', 'БАЛДА', '.ФЛАХ', '.....'].map(row => row.split(''))
 
 const App = () => <>
     <h1>Hello</h1>

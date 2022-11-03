@@ -1,5 +1,11 @@
-import React from 'react';
+import React from 'react'
+import Board from "./board/Board";
 
-const App = () => <div>Hello</div>
+const field = [ "Т....", "ЕГТЫН", "БАЛДА", ".ФЛАХ", "....." ]
 
-export default App;
+const App = () => <>
+    <h1>Hello</h1>
+    <Board data={field.map(row => row.split(""))}/>
+</>
+
+export default App

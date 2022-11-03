@@ -1,0 +1,12 @@
+table, th, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+
+th, td, tr {
+    text-align: center;
+}
+
+td:empty:after, th:empty:after {
+    content: "\00a0";
+}

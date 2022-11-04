@@ -3,6 +3,7 @@ import React, { useState } from 'react'
 import './board.css'
 import { makeMove } from '../api/service'
 import Cell from './Cell'
+import ScoreBoard from './ScoreBoard'
 
 type TBoard = {
     data: Field
@@ -74,27 +75,7 @@ const Board = ({ data }: TBoard) => {
             }
             </tbody>
         </table>
-        <table>
-            <caption>Scoreboard</caption>
-            <thead>
-                <tr>
-                    <th>User words</th>
-                    <th>ComputerWords</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>{userWords.join(", ")}</td>
-                    <td>{computerWords.join(", ")}</td>
-                </tr>
-            </tbody>
-            <tfoot>
-                <tr>
-                    <td><b>Score:</b> {userWords.map(w => w.length).reduce((pw, cw) => pw + cw, 0)}</td>
-                    <td><b>Score:</b> {computerWords.map(w => w.length).reduce((pw, cw) => pw + cw, 0)}</td>
-                </tr>
-            </tfoot>
-        </table>
+        <ScoreBoard userWords={userWords} computerWords={computerWords}/>
     </>
 }
 

@@ -14,6 +14,9 @@ const Board = ({ data }: TBoard) => {
     const [word, setWord] = useState([])
     const [usedWords, setUsedWords] = useState([data[2]?.join('')])
 
+    const [userWords, setUserWords] = useState([])
+    const [computerWords, setComputerWords] = useState([])
+
     const updateState = event => {
         const [x, y] = event.target.id
         const letter = event.target.value.toUpperCase()
@@ -39,18 +42,14 @@ const Board = ({ data }: TBoard) => {
 
     const onSubmit = async () => {
         setUsedWords([...usedWords, word.join('')])
+        setUserWords([...userWords, word.join('')])
         setWord([])
 
         const computerMove = await makeMove({ field, usedWords })
-
-        console.log('computerMove', computerMove)
-        console.log('computerMove.letter', computerMove.letter)
-
         const [x, y] = computerMove.cell
-        console.log('[x, y]', [x, y])
         const updatedField = [...field]
-        console.log('updatedField', updatedField)
         updatedField[x][y] = computerMove.letter
+        setComputerWords([...computerWords, computerMove.word])
         setField(updatedField)
     }
 
@@ -74,6 +73,27 @@ const Board = ({ data }: TBoard) => {
                     .map((row, i) => <tr key={i}>{row}</tr>)
             }
             </tbody>
+        </table>
+        <table>
+            <caption>Scoreboard</caption>
+            <thead>
+                <tr>
+                    <th>User words</th>
+                    <th>ComputerWords</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{userWords.join(", ")}</td>
+                    <td>{computerWords.join(", ")}</td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td><b>Score:</b> {userWords.map(w => w.length).reduce((pw, cw) => pw + cw, 0)}</td>
+                    <td><b>Score:</b> {computerWords.map(w => w.length).reduce((pw, cw) => pw + cw, 0)}</td>
+                </tr>
+            </tfoot>
         </table>
     </>
 }

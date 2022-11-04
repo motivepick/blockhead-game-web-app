@@ -13,6 +13,8 @@ const Game = () => {
     const onSubmitWord = async () => {
         store.userMakesAMove(store.word.join(''))
 
+        console.log("usedWords: store.wordsUsed", { usedWords: store.wordsUsed })
+
         const computerMove = await makeMove({ field: store.field, usedWords: store.wordsUsed })
         store.computerMakesAMove(computerMove.word, computerMove.letter, computerMove.cell)
     }

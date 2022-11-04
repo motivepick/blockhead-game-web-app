@@ -5,8 +5,12 @@ const reducer = (state, action) => {
     switch (action.type) {
         case actions.CREATE_NEW_FIELD: {
             const { field } = action
+            const word = field[2].join('')
 
-            return Object.assign({}, state, { field })
+            return Object.assign({}, state, {
+                field,
+                wordsUsed: [...state.wordsUsed, word]
+            })
         }
         case actions.UPDATE_WORD: {
             const { letter } = action

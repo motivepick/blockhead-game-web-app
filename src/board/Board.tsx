@@ -1,6 +1,7 @@
 // @ts-nocheck
 import React, { useState } from 'react'
 import './board.css'
+import { makeMove } from '../api/service'
 import Cell from './Cell'
 
 type TBoard = {
@@ -11,7 +12,7 @@ const Board = ({ data }: TBoard) => {
     const [field, setField] = useState(data)
     const [lastSetLetter, setLastSetLetter] = useState({ id: '', value: '' })
     const [word, setWord] = useState([])
-    const [usedWords, setUsedWords] = useState([data[2].join("")])
+    const [usedWords, setUsedWords] = useState([data[2]?.join('')])
 
     const updateState = event => {
         const [x, y] = event.target.id
@@ -36,9 +37,21 @@ const Board = ({ data }: TBoard) => {
         setWord([])
     }
 
-    const onSubmit = () => {
-        setUsedWords([...usedWords, word.join("")])
+    const onSubmit = async () => {
+        setUsedWords([...usedWords, word.join('')])
         setWord([])
+
+        const computerMove = await makeMove({ field, usedWords })
+
+        console.log('computerMove', computerMove)
+        console.log('computerMove.letter', computerMove.letter)
+
+        const [x, y] = computerMove.cell
+        console.log('[x, y]', [x, y])
+        const updatedField = [...field]
+        console.log('updatedField', updatedField)
+        updatedField[x][y] = computerMove.letter
+        setField(updatedField)
     }
 
     return <>

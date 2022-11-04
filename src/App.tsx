@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { createNewField } from './api/service'
-import Board from './board/Board'
+import Game from './board/Game'
 
 const App = () => {
     const [field, setField] = useState([[]] as Field)
@@ -15,7 +15,7 @@ const App = () => {
 
     return <>
         <h1>Hello</h1>
-        {field[0].length > 0 ? <Board data={field}/> : <div/>}
+        {field[0].length > 0 ? <Game data={field}/> : <div/>}
     </>
 }
 

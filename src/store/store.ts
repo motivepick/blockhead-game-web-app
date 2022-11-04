@@ -8,6 +8,9 @@ const store = (state, dispatch) => ({
     wordsUsed: state.wordsUsed,
     wordsByUser: state.wordsByUser,
     wordsByComputer: state.wordsByComputer,
+    createNewField: (field) => {
+        dispatch({ type: actions.CREATE_NEW_FIELD, field })
+    },
     placeLetter: (letter, cell) => {
         dispatch({ type: actions.PLACE_LETTER, letter, cell })
     },

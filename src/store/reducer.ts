@@ -3,6 +3,11 @@ import actions from './actions'
 
 const reducer = (state, action) => {
     switch (action.type) {
+        case actions.CREATE_NEW_FIELD: {
+            const { field } = action
+
+            return Object.assign({}, state, { field })
+        }
         case actions.UPDATE_WORD: {
             const { letter } = action
 

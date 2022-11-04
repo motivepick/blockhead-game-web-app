@@ -6,11 +6,7 @@ import Board from './Board'
 import { GameContext } from '../store/GameContext'
 import ScoreBoard from './ScoreBoard'
 
-type TGame = {
-    data: Field
-}
-
-const Game = ({ data }: TGame) => {
+const Game = () => {
     const store = useContext(GameContext);
     console.log(store)
 

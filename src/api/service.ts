@@ -12,9 +12,9 @@ export const makeMove = async ({ field, wordsUsed }: { field: Field, wordsUsed: 
     }
 }
 
-export const createNewField: () => Promise<Field> = async () => {
+export const createNewField = async (size: Number = 3): Promise<Field> => {
     try {
-        const response = await api.get('/field')
+        const response = await api.get(`/field/${size}`)
         const rawField = response.data as string[]
         return rawField.map(row => row.split(''))
     } catch (error) {

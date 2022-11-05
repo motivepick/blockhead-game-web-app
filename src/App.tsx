@@ -1,17 +1,16 @@
 import React from 'react'
 import Game from './board/Game'
-import { useAppDispatch } from './store/hooks'
-import { fetchCreateNewField, userMove } from './store/reducer'
+import {useAppDispatch} from './store/hooks'
+import {fetchCreateNewField} from './store/reducer'
 
 const App = () => {
     const dispatch = useAppDispatch()
-    dispatch(fetchCreateNewField())
+    dispatch(fetchCreateNewField(5))
 
     return <>
-        <h1>Hello</h1>
+        <h1>Blockhead</h1>
         <Game/>
     </>
 }
-
 
 export default App

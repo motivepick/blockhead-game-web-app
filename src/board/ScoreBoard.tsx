@@ -1,17 +1,17 @@
-// @ts-nocheck
-import React, { useContext } from 'react'
-import { GameContext } from '../store/GameContext'
+import React from 'react'
+import { useAppSelector } from '../store/hooks'
+import { selectAll } from '../store/reducer'
 
 const zip: (a: Words, b: Words) => Words[] = (a, b) => Array
     .from(Array(Math.max(a.length, b.length)).keys())
-    .map(i => [i < a.length ? a[i] : '' , i < b.length ? b[i] : ''])
+    .map(i => [i < a.length ? a[i] : '', i < b.length ? b[i] : ''])
 
 const score: (words: Words) => number = words => words
     .map(w => w.length)
     .reduce((pw, cw) => pw + cw, 0)
 
 const ScoreBoard = () => {
-    const { wordsByUser, wordsByComputer } = useContext(GameContext);
+    const { wordsByUser, wordsByComputer } = useAppSelector(selectAll)
 
     return <table>
         <caption>Scoreboard</caption>

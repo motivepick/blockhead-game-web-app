@@ -1,33 +1,32 @@
 // @ts-nocheck
-import React, { useContext, useState } from 'react'
+import React from 'react'
 import './board.css'
-import { makeMove } from '../api/service'
+import { useAppDispatch, useAppSelector } from '../store/hooks'
+import { fetchComputerMove, userMove, selectAll, resetWord } from '../store/reducer'
+import store from '../store/store'
 import Board from './Board'
-import { GameContext } from '../store/GameContext'
 import ScoreBoard from './ScoreBoard'
 
+
 const Game = () => {
-    const store = useContext(GameContext);
-    console.log(store)
+    const allState = useAppSelector(selectAll)
+    const dispatch = useAppDispatch()
 
     const onSubmitWord = async () => {
-        store.userMakesAMove(store.word.join(''))
-
-        console.log("usedWords: store.wordsUsed", { usedWords: store.wordsUsed })
-
-        const computerMove = await makeMove({ field: store.field, usedWords: store.wordsUsed })
-        store.computerMakesAMove(computerMove.word, computerMove.letter, computerMove.cell)
+        dispatch(userMove({ word: allState.word.join('') }))
+        const { field, wordsUsed } = store.getState()
+        dispatch(fetchComputerMove({ field, wordsUsed }))
     }
 
     return <>
-        <h2>Chosen letter: {store.lastSetLetter.value}</h2>
-        <h2>Chosen word: {store.word}</h2>
-        <button onClick={store.resetWord}>Reset chosen word</button>
+        <h2>Chosen letter: {allState.lastSetLetter.value}</h2>
+        <h2>Chosen word: {allState.word}</h2>
+        <button onClick={() => dispatch(resetWord())}>Reset chosen word</button>
         <button onClick={onSubmitWord}>Submit chosen word</button>
         <br/>
-        <Board />
+        <Board/>
         <br/>
-        <ScoreBoard />
+        <ScoreBoard/>
     </>
 }
 

@@ -1,72 +1,89 @@
 // @ts-nocheck
-import actions from './actions'
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
+import { makeMove, createNewField } from '../api/service'
+import { RootState } from './store'
 
-const reducer = (state, action) => {
-    switch (action.type) {
-        case actions.CREATE_NEW_FIELD: {
-            const { field } = action
-            const word = field[2].join('')
+const initialState = {
+    field: [[]],
+    lastSetLetter: { id: '', value: '' },
+    word: [],
+    wordsUsed: [],
+    wordsByUser: [],
+    wordsByComputer: []
+}
 
-            return Object.assign({}, state, {
-                field,
-                wordsUsed: [...state.wordsUsed, word]
-            })
-        }
-        case actions.UPDATE_WORD: {
-            const { letter } = action
+export const fetchComputerMove = createAsyncThunk(
+    'fetchComputerMove',
+    async ({ field, wordsUsed }) => makeMove({ field, wordsUsed })
+)
 
-            return Object.assign({}, state, {
-                word: [...state.word, letter]
-            })
-        }
-        case actions.RESET_WORD: {
-            return Object.assign({}, state, {
-                word: []
-            })
-        }
-        case actions.USER_MOVE: {
-            const { word } = action
+export const fetchCreateNewField = createAsyncThunk('fetchCreateNewField', createNewField)
 
-            return Object.assign({}, state, {
-                word: [],
-                lastSetLetter: { id: '', value: '' },
-                wordsUsed: [...state.wordsUsed, word],
-                wordsByUser: [...state.wordsByUser, word]
-            })
-        }
-        case actions.PLACE_LETTER: {
-            const { letter, cell } = action
+const gameSlice = createSlice({
+    name: 'game',
+    initialState,
+    reducers: {
+        updateWord(state, action) {
+            const { letter } = action.payload
+            state.word.push(letter)
+        },
+        resetWord(state, action) {
+            state.word = []
+        },
+        userMove(state, action) {
+            const { word } = action.payload
+
+            state.word = []
+            state.lastSetLetter = { id: '', value: '' }
+            state.wordsUsed.push(word)
+            state.wordsByUser.push(word)
+        },
+        placeLetter(state, action) {
+            const { letter, cell } = action.payload
 
             const [x, y] = cell
-            const updatedField = [...state.field]
-            updatedField[x][y] = letter.toUpperCase()
+            state.field[x][y] = letter.toUpperCase()
 
             if (state.lastSetLetter.id !== '') {
                 const [xi, yi] = state.lastSetLetter.id
-                updatedField[xi][yi] = '.'
+                state.field[xi][yi] = '.'
             }
 
-            return Object.assign({}, state, {
-                field: updatedField,
-                lastSetLetter: { id: cell, value: letter.toUpperCase() }
-            })
-        }
-        case actions.COMPUTER_MOVE: {
-            const { word, letter, cell } = action
+            state.lastSetLetter = { id: cell, value: letter.toUpperCase() }
+        },
+        computerMove(state, action) {
+            const { word, letter, cell } = action.payload
 
             const [x, y] = cell
-            const updatedField = [...state.field]
-            updatedField[x][y] = letter.toUpperCase()
+            state.field[x][y] = letter.toUpperCase()
 
-            return Object.assign({}, state, {
-                field: updatedField,
-                wordsUsed: [...state.wordsUsed, word],
-                wordsByComputer: [...state.wordsByComputer, word]
+            state.wordsUsed.push(word)
+            state.wordsByComputer.push(word)
+        },
+    },
+    extraReducers: (builder) => {
+        builder
+            .addCase(fetchComputerMove.fulfilled, (state, action) => {
+                const { word, letter, cell } = action.payload
+
+                const [x, y] = cell
+                state.field[x][y] = letter.toUpperCase()
+
+                state.wordsUsed.push(word)
+                state.wordsByComputer.push(word)
             })
-        }
-        default:
-            return state
-    }
-}
+            .addCase(fetchCreateNewField.fulfilled, (state, action) => {
+                const field = action.payload
+                const word = field[2].join('')
 
-export default reducer
+                state.field = field
+                state.wordsUsed.push(word)
+            })
+    },
+})
+
+export const { userMove, updateWord, placeLetter, resetWord } = gameSlice.actions
+
+export default gameSlice.reducer
+
+export const selectAll = (state: RootState) => state

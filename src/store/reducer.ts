@@ -10,8 +10,7 @@ const initialState = {
     word: [],
     wordsUsed: [],
     wordsByUser: [],
-    wordsByComputer: [],
-    error: ''
+    wordsByComputer: []
 }
 
 export const fetchComputerMove = createAsyncThunk(
@@ -26,28 +25,21 @@ const gameSlice = createSlice({
     initialState,
     reducers: {
         updateWord(state, action) {
-            state.error = ''
             const { letter } = action.payload
             state.word.push(letter)
         },
         resetWord(state, action) {
-            state.error = ''
             state.word = []
         },
         userMove(state, action) {
             const { word } = action.payload
 
-            if(state.wordsUsed.includes(word)) {
-                state.error = 'Word already used'
-            } else {
-                state.word = []
-                state.lastSetLetter = { id: '', value: '' }
-                state.wordsUsed.push(word)
-                state.wordsByUser.push(word)
-            }
+            state.word = []
+            state.lastSetLetter = { id: '', value: '' }
+            state.wordsUsed.push(word)
+            state.wordsByUser.push(word)
         },
         placeLetter(state, action) {
-            state.error = ''
             const { letter, cell } = action.payload
 
             const [x, y] = cell
@@ -61,7 +53,6 @@ const gameSlice = createSlice({
             state.lastSetLetter = { id: cell, value: letter.toUpperCase() }
         },
         computerMove(state, action) {
-            state.error = ''
             const { word, letter, cell } = action.payload
 
             const [x, y] = cell
@@ -74,7 +65,6 @@ const gameSlice = createSlice({
     extraReducers: (builder) => {
         builder
             .addCase(fetchComputerMove.fulfilled, (state, action) => {
-                state.error = ''
                 const { word, letter, cell } = action.payload
 
                 const [x, y] = cell
@@ -84,7 +74,6 @@ const gameSlice = createSlice({
                 state.wordsByComputer.push(word)
             })
             .addCase(fetchCreateNewField.fulfilled, (state, action) => {
-                state.error = ''
                 const field = action.payload
                 const word = field[Math.floor(field.length / 2)].join('')
 

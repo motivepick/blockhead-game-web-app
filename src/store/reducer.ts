@@ -18,7 +18,7 @@ export const fetchComputerMove = createAsyncThunk(
     async ({ field, wordsUsed }) => makeMove({ field, wordsUsed })
 )
 
-export const fetchCreateNewField = createAsyncThunk('fetchCreateNewField', createNewField)
+export const fetchCreateNewField = createAsyncThunk('fetchCreateNewField', async (size: Number) => createNewField(size))
 
 const gameSlice = createSlice({
     name: 'game',

@@ -4,7 +4,8 @@ export const makeMove = async ({ field, wordsUsed }: { field: Field, wordsUsed: 
     try {
         const response = await api.post('/move-requests', {
             field: field.map(row => row.join('')),
-            usedWords: wordsUsed
+            usedWords: wordsUsed,
+            difficulty: 'Medium'
         })
         return response.data
     } catch (error) {

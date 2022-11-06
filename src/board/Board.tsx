@@ -13,18 +13,23 @@ const Board = () => {
         cell: event.target.id
     }))
 
-    return <table>
-        <tbody className="row" >
-        {
-            allState.field
-                .map((row, i) => row.map((l, j) =>
-                    <Cell key={`${i}${j}`} id={`${i}${j}`} letter={l} value={l}
-                          onSelectWord={(letter: string) => dispatch(updateWord({ letter }))}
-                          onChange={onPlaceLetter}/>))
-                .map((row, i) => <tr key={i}>{row}</tr>)
-        }
-        </tbody>
-    </table>
+    return <div className="container">
+        <div className="grid" style={{
+            gridTemplateColumns: `repeat(${allState.fieldSize}, 80px)`,
+            gridTemplateRows: `repeat(${allState.fieldSize}, 80px)`
+        }}>
+            {
+                allState.field
+                    .flatMap((row, i) => row.map((l, j) =>
+                        <Cell key={`${i}${j}`}
+                              id={`${i}${j}`}
+                              letter={l}
+                              value={l}
+                              onSelectWord={(letter: string) => dispatch(updateWord({ letter }))}
+                              onChange={onPlaceLetter}/>))
+            }
+        </div>
+    </div>
 }
 
 export default Board

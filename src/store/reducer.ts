@@ -5,6 +5,7 @@ import { RootState } from './store'
 
 const initialState = {
     field: [[]],
+    fieldSize: 0,
     lastSetLetter: { id: '', value: '' },
     word: [],
     wordsUsed: [],
@@ -85,9 +86,10 @@ const gameSlice = createSlice({
             .addCase(fetchCreateNewField.fulfilled, (state, action) => {
                 state.error = ''
                 const field = action.payload
-                const word = field[2].join('')
+                const word = field[Math.floor(field.length / 2)].join('')
 
                 state.field = field
+                state.fieldSize = field.length
                 state.wordsUsed.push(word)
             })
     },

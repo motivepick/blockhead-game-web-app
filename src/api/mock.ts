@@ -29,8 +29,16 @@ const field = [
     '.....'
 ]
 
+const field3 = [
+    '...',
+    'БАЛ',
+    '...'
+]
+
 export const mock = (api: AxiosInstance) => new MockAdapter(api, { delayResponse: 200 })
-    .onGet('/field')
+    .onGet('/field/3')
+    .reply(200, field3)
+    .onGet('/field/5')
     .reply(200, field)
     .onPost('/move-requests')
     .reply(200, serverResponse)

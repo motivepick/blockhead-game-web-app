@@ -14,8 +14,8 @@ const Game = () => {
 
     const onSubmitWord = async () => {
         dispatch(userMove({ word: allState.word.join('') }))
-        const { field, wordsUsed } = store.getState()
-        dispatch(fetchComputerMove({ field, wordsUsed }))
+        const { field, wordsUsed, error } = store.getState()
+        if(error !== '') dispatch(fetchComputerMove({ field, wordsUsed }))
     }
 
     return <>
@@ -23,6 +23,7 @@ const Game = () => {
         <h2>Chosen word: {allState.word}</h2>
         <button onClick={() => dispatch(resetWord())}>Reset chosen word</button>
         <button onClick={onSubmitWord}>Submit chosen word</button>
+        { allState.error !== '' && <p>{allState.error}</p> }
         <br/>
         <Board/>
         <br/>

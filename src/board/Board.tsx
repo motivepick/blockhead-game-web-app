@@ -14,7 +14,7 @@ const Board = () => {
     }))
 
     return <table>
-        <tbody>
+        <tbody className="row" >
         {
             allState.field
                 .map((row, i) => row.map((l, j) =>

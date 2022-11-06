@@ -50,6 +50,7 @@ const gameSlice = createSlice({
                 state.field[xi][yi] = '.'
             }
 
+            state.word = []
             state.lastSetLetter = { id: cell, value: letter.toUpperCase() }
         },
         computerMove(state, action) {

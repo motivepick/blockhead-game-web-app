@@ -2,6 +2,8 @@ import React from 'react'
 import { useAppSelector } from '../store/hooks'
 import { selectAll } from '../store/reducer'
 
+import './score-board.css'
+
 const zip: (a: Words, b: Words) => Words[] = (a, b) => Array
     .from(Array(Math.max(a.length, b.length)).keys())
     .map(i => [i < a.length ? a[i] : '', i < b.length ? b[i] : ''])

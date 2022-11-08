@@ -1,6 +1,5 @@
 // @ts-nocheck
 import React from 'react'
-import './board.css'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
 import { fetchComputerMove, userMove, selectAll, resetWord } from '../store/reducer'
 import store from '../store/store'
@@ -18,16 +17,29 @@ const Game = () => {
         dispatch(fetchComputerMove({ field, wordsUsed }))
     }
 
-    return <>
-        <h2>Chosen letter: {allState.lastSetLetter.value}</h2>
-        <h2>Chosen word: {allState.word}</h2>
-        <button onClick={() => dispatch(resetWord())}>Reset chosen word</button>
-        <button onClick={onSubmitWord}>Submit chosen word</button>
-        <br/>
-        <Board/>
-        <br/>
-        <ScoreBoard/>
-    </>
+    return <div>
+        <div className="grid grid-cols-5 gap-3">
+            <div className="some-class"><ScoreBoard/></div>
+            <div className="col-span-3">
+                <div className="grid grid-flow-row auto-rows-max">
+                    <Board/>
+                    <br/>
+                    <h2>Chosen letter: {allState.lastSetLetter.value}</h2>
+                    <h2>Chosen word: {allState.word}</h2>
+                    <br/>
+                    <>
+                        <button className="h-10 px-6 font-semibold rounded-md border border-slate-200 text-slate-900"
+                                type="button" onClick={() => dispatch(resetWord())}>Reset chosen word
+                        </button>
+                        <button className="h-10 px-6 font-semibold rounded-md border border-slate-200 text-slate-900"
+                                type="button" onClick={onSubmitWord}>Submit chosen word
+                        </button>
+                    </>
+                </div>
+            </div>
+            <div className="some-class"><ScoreBoard/></div>
+        </div>
+    </div>
 }
 
 export default Game

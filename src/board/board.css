@@ -2,20 +2,6 @@
     --main-cell-color: white;
 }
 
-table, th, td {
-    border: 1px solid black;
-    border-collapse: collapse;
-    text-indent: 0;
-}
-
-th, td, tr {
-    text-align: center;
-}
-
-td:empty:after, th:empty:after {
-    content: "\00a0";
-}
-
 .container {
     background: black;
     display: inline-block;
@@ -25,6 +11,7 @@ td:empty:after, th:empty:after {
 .grid {
     display: grid;
     grid-gap: 5px;
+    width: fit-content;
 }
 
 .cell {

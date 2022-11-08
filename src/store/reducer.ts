@@ -10,7 +10,9 @@ const initialState = {
     word: [],
     wordsUsed: [],
     wordsByUser: [],
-    wordsByComputer: []
+    wordsByComputer: [],
+    scoreByUser: 0,
+    scoreByComputer: 0,
 }
 
 export const fetchComputerMove = createAsyncThunk(
@@ -38,6 +40,7 @@ const gameSlice = createSlice({
             state.lastSetLetter = { id: '', value: '' }
             state.wordsUsed.push(word)
             state.wordsByUser.push(word)
+            state.scoreByUser += word.length
         },
         placeLetter(state, action) {
             const { letter, cell } = action.payload
@@ -73,6 +76,7 @@ const gameSlice = createSlice({
 
                 state.wordsUsed.push(word)
                 state.wordsByComputer.push(word)
+                state.scoreByComputer += word.length
             })
             .addCase(fetchCreateNewField.fulfilled, (state, action) => {
                 const field = action.payload

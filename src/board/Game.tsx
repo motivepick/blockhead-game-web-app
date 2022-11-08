@@ -19,13 +19,13 @@ const Game = () => {
 
     return <div>
         <div className="grid grid-cols-5 gap-3">
-            <div className="some-class"><ScoreBoard/></div>
+            <div/>
             <div className="col-span-3">
                 <div className="grid grid-flow-row auto-rows-max">
                     <Board/>
                     <br/>
-                    <h2>Chosen letter: {allState.lastSetLetter.value}</h2>
-                    <h2>Chosen word: {allState.word}</h2>
+                    <h2 className="font-medium leading-tight text-3xl mt-0 mb-2">Chosen letter: {allState.lastSetLetter.value}</h2>
+                    <h2 className="font-medium leading-tight text-3xl mt-0 mb-2">Chosen word: {allState.word}</h2>
                     <br/>
                     <>
                         <button className="h-10 px-6 font-semibold rounded-md border border-slate-200 text-slate-900"

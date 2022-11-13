@@ -3,6 +3,8 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import { makeMove, createNewField } from '../api/service'
 import { RootState } from './store'
 
+const cyrillicAlphabet = /^\p{Script=Cyrillic}+$/u
+
 const initialState = {
     field: [[]],
     fieldSize: 0,
@@ -13,6 +15,7 @@ const initialState = {
     wordsByComputer: [],
     scoreByUser: 0,
     scoreByComputer: 0,
+    error: false
 }
 
 export const fetchComputerMove = createAsyncThunk(
@@ -45,6 +48,12 @@ const gameSlice = createSlice({
         placeLetter(state, action) {
             const { letter, cell } = action.payload
 
+            if (!letter.match(cyrillicAlphabet)) {
+                state.error = 'Letter should be from the alphabet'
+            } else {
+                state.error = false
+            }
+
             const [x, y] = cell
             state.field[x][y] = letter.toUpperCase()
 
@@ -55,6 +64,17 @@ const gameSlice = createSlice({
 
             state.word = []
             state.lastSetLetter = { id: cell, value: letter.toUpperCase() }
+        },
+        removeLetter(state, action) {
+            const { cell } = action.payload
+
+            if (state.lastSetLetter.id === cell) {
+                const [x, y] = cell
+                state.field[x][y] = '.'
+                state.lastSetLetter = { id: '', value: '' }
+                state.word = []
+                state.error = false
+            }
         },
         computerMove(state, action) {
             const { word, letter, cell } = action.payload
@@ -89,7 +109,7 @@ const gameSlice = createSlice({
     },
 })
 
-export const { userMove, updateWord, placeLetter, resetWord } = gameSlice.actions
+export const { userMove, updateWord, placeLetter, removeLetter, resetWord } = gameSlice.actions
 
 export default gameSlice.reducer
 

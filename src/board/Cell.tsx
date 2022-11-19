@@ -12,12 +12,14 @@ type TCell = {
 
 const Cell = ({ id, letter, value, onSelectWord, onResetLetter, onChange }: TCell) => {
     if (letter !== '.') {
-        return <div className="cell" id={id} onClick={_ => onSelectWord(letter)} onContextMenu={onResetLetter}>
+        return <div className="cell dark:text-gray-100 dark:bg-slate-600" id={id} onClick={_ => onSelectWord(letter)}
+                    onContextMenu={onResetLetter}>
             {letter}
         </div>
     }
     return <div className="cell" id={id}>
-        <input className="cellInput" id={id} type="text" maxLength={1} value={value === '.' ? '' : value}
+        <input className="cellInput dark:text-gray-100 dark:bg-slate-600" id={id} type="text" maxLength={1}
+               value={value === '.' ? '' : value}
                onChange={onChange}/>
     </div>
 }

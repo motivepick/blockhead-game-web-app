@@ -19,7 +19,7 @@ const Board = () => {
         dispatch(removeLetter({ cell: target.id }))
     }
 
-    return <div className="container">
+    return <div className="container dark:bg-gray-400">
         <div className="grid" style={{
             gridTemplateColumns: `repeat(${allState.fieldSize}, 80px)`,
             gridTemplateRows: `repeat(${allState.fieldSize}, 80px)`

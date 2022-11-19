@@ -12,7 +12,7 @@ const Game = () => {
     const dispatch = useAppDispatch()
 
     const onSubmitWord = async () => {
-        if(allState.error) return
+        if (allState.error) return
         dispatch(userMove({ word: allState.word.join('') }))
         const { field, wordsUsed } = store.getState()
         dispatch(fetchComputerMove({ field, wordsUsed }))
@@ -26,22 +26,26 @@ const Game = () => {
                     <Board/>
                     <br/>
                     {allState.error &&
-                        <p className="h-10 px-6 font-semibold rounded-md text-red-900">Error: {allState.error}</p>}
+                        <p className="h-10 px-6 font-semibold rounded-md text-red-900 dark:text-red-400">Error: {allState.error}</p>}
                     <h2 className="font-medium leading-tight text-3xl mt-0 mb-2">Chosen
                         letter: {allState.lastSetLetter.value}</h2>
                     <h2 className="font-medium leading-tight text-3xl mt-0 mb-2">Chosen word: {allState.word}</h2>
                     <br/>
                     <>
-                        <button className="h-10 px-6 font-semibold rounded-md border border-slate-200 text-slate-900"
-                                type="button" onClick={onSubmitWord}>Submit chosen word
+                        <button
+                            className="h-10 px-6 font-semibold rounded-md border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-gray-200"
+                            type="button" onClick={onSubmitWord}>Submit chosen word
                         </button>
-                        <button className="h-10 px-6 font-semibold rounded-md border border-slate-200 text-slate-900"
-                                type="button" onClick={() => dispatch(resetWord())}>Reset chosen word
+                        <button
+                            className="h-10 px-6 font-semibold rounded-md border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-gray-200"
+                            type="button" onClick={() => dispatch(resetWord())}>Reset chosen word
                         </button>
                     </>
                 </div>
             </div>
-            <div className="some-class"><ScoreBoard/></div>
+            <div>
+                <ScoreBoard/>
+            </div>
         </div>
     </div>
 }

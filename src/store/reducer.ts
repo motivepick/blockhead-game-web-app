@@ -27,6 +27,14 @@ export const fetchComputerMove = createAsyncThunk(
     }
 )
 
+export const fetchHint = createAsyncThunk(
+    'moves/user',
+    async (word, { getState }) => {
+        const { field, wordsUsed } = getState()
+        return makeMove({ field, wordsUsed })
+    }
+)
+
 export const fetchCreateNewField = createAsyncThunk('fetchCreateNewField', async (size: Number) => createNewField(size))
 
 const gameSlice = createSlice({
@@ -82,6 +90,16 @@ const gameSlice = createSlice({
                 placeLetterOnFieldState(state, { letter, cell: `${cell[0]}_${cell[1]}` })
                 commitWordState(state, action.payload.word, "computer")
                 state.wordPath = action.payload.path.map(([x, y]) => `${x}_${y}`)
+            })
+            .addCase(fetchHint.fulfilled, (state, action) => {
+                const { letter, cell } = action.payload
+                const id = `${cell[0]}_${cell[1]}`
+
+                state.word = action.payload.word.split('')
+                state.wordPath = action.payload.path.map(([x, y]) => `${x}_${y}`)
+
+                placeLetterOnFieldState(state, { letter, cell: id })
+                state.lastSetLetter = { id, value: letter.toUpperCase() }
             })
             .addCase(fetchCreateNewField.fulfilled, (state, action) => {
                 const field = action.payload

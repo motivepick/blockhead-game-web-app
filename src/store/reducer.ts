@@ -48,11 +48,7 @@ const gameSlice = createSlice({
         placeLetter(state, action) {
             const { letter, cell } = action.payload
 
-            if (!letter.match(cyrillicAlphabet)) {
-                state.error = 'Letter should be from the alphabet'
-            } else {
-                state.error = false
-            }
+            state.error = checkAlphabet(letter)
 
             placeLetterOnFieldState(state, action.payload)
 
@@ -107,6 +103,8 @@ const placeLetterOnFieldState = (state, { letter, cell }) => {
     const [x, y] = cell
     state.field[x][y] = letter.toUpperCase()
 }
+
+const checkAlphabet = letter => !letter.match(cyrillicAlphabet) ? 'Letter should be from the alphabet' : ''
 
 export const { userMove, updateWord, placeLetter, removeLetter, resetWord } = gameSlice.actions
 

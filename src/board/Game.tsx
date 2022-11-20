@@ -1,7 +1,12 @@
 // @ts-nocheck
 import React from 'react'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
-import { fetchComputerMove, userMove, selectAll, resetWord } from '../store/reducer'
+import {
+    fetchComputerMove,
+    userMove,
+    selectAll,
+    resetWord
+} from '../store/reducer'
 import store from '../store/store'
 import Board from './Board'
 import ScoreBoard from './ScoreBoard'
@@ -14,8 +19,7 @@ const Game = () => {
     const onSubmitWord = async () => {
         if (allState.error) return
         dispatch(userMove({ word: allState.word.join('') }))
-        const { field, wordsUsed } = store.getState()
-        dispatch(fetchComputerMove({ field, wordsUsed }))
+        dispatch(fetchComputerMove())
     }
 
     return <div>

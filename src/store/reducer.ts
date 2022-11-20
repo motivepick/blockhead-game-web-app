@@ -19,8 +19,11 @@ const initialState = {
 }
 
 export const fetchComputerMove = createAsyncThunk(
-    'fetchComputerMove',
-    async ({ field, wordsUsed }) => makeMove({ field, wordsUsed })
+    'moves/computer',
+    async (word, { getState }) => {
+        const { field, wordsUsed } = getState()
+        return makeMove({ field, wordsUsed })
+    }
 )
 
 export const fetchCreateNewField = createAsyncThunk('fetchCreateNewField', async (size: Number) => createNewField(size))
@@ -84,7 +87,7 @@ const gameSlice = createSlice({
 
             state.wordsUsed.push(word)
             state.wordsByComputer.push(word)
-        },
+        }
     },
     extraReducers: (builder) => {
         builder
@@ -109,7 +112,7 @@ const gameSlice = createSlice({
     },
 })
 
-export const { userMove, updateWord, placeLetter, removeLetter, resetWord } = gameSlice.actions
+export const { userMove, updateWord, placeLetter, removeLetter, resetWord, clearBeforeHint } = gameSlice.actions
 
 export default gameSlice.reducer
 

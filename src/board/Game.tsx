@@ -7,7 +7,6 @@ import {
     selectAll,
     resetWord
 } from '../store/reducer'
-import store from '../store/store'
 import Board from './Board'
 import ScoreBoard from './ScoreBoard'
 
@@ -18,9 +17,11 @@ const Game = () => {
 
     const onSubmitWord = async () => {
         if (allState.error) return
-        dispatch(userMove({ word: allState.word.join('') }))
+        dispatch(userMove())
         dispatch(fetchComputerMove())
     }
+
+    const onResetWord = () => dispatch(resetWord())
 
     return <div>
         <div className="grid grid-cols-5 gap-3">
@@ -42,7 +43,7 @@ const Game = () => {
                         </button>
                         <button
                             className="h-10 px-6 font-semibold rounded-md border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-gray-200"
-                            type="button" onClick={() => dispatch(resetWord())}>Reset chosen word
+                            type="button" onClick={onResetWord}>Reset chosen word
                         </button>
                     </>
                 </div>

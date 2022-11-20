@@ -10,6 +10,7 @@ const initialState = {
     fieldSize: 0,
     lastSetLetter: { id: '', value: '' },
     word: [],
+    wordPath: [],
     wordsUsed: [],
     wordsByUser: [],
     wordsByComputer: [],
@@ -33,11 +34,13 @@ const gameSlice = createSlice({
     initialState,
     reducers: {
         updateWord(state, action) {
-            const { letter } = action.payload
+            const { letter, cell } = action.payload
             state.word.push(letter)
+            state.wordPath.push(cell)
         },
         resetWord(state, action){
             resetWordState(state)
+            state.wordPath = []
         },
         userMove(state, action) {
             commitWordState(state, state.word.join(''), "user")
@@ -58,6 +61,7 @@ const gameSlice = createSlice({
 
             resetWordState(state)
             state.lastSetLetter = { id: cell, value: letter.toUpperCase() }
+            state.wordPath = []
         },
         removeLetter(state, action) {
             const { cell } = action.payload
@@ -73,8 +77,11 @@ const gameSlice = createSlice({
     extraReducers: (builder) => {
         builder
             .addCase(fetchComputerMove.fulfilled, (state, action) => {
-                placeLetterOnFieldState(state, action.payload)
+                const { letter, cell } = action.payload
+
+                placeLetterOnFieldState(state, { letter, cell: `${cell[0]}_${cell[1]}` })
                 commitWordState(state, action.payload.word, "computer")
+                state.wordPath = action.payload.path.map(([x, y]) => `${x}_${y}`)
             })
             .addCase(fetchCreateNewField.fulfilled, (state, action) => {
                 const field = action.payload
@@ -100,7 +107,7 @@ const resetWordState = (state) => state.word = []
 const resetLetterState = (state) => state.lastSetLetter = { id: '', value: '' }
 
 const placeLetterOnFieldState = (state, { letter, cell }) => {
-    const [x, y] = cell
+    const [x, y] = cell.split('_')
     state.field[x][y] = letter.toUpperCase()
 }
 

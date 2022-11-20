@@ -27,11 +27,12 @@ const Board = () => {
             {
                 allState.field
                     .flatMap((row, i) => row.map((l, j) =>
-                        <Cell key={`${i}${j}`}
-                              id={`${i}${j}`}
+                        <Cell key={`${i}_${j}`}
+                              id={`${i}_${j}`}
+                              path={allState.wordPath}
                               letter={l}
                               value={l}
-                              onSelectWord={(letter: string) => dispatch(updateWord({ letter }))}
+                              onSelectWord={(letter: string) => dispatch(updateWord({ letter, cell: `${i}_${j}` }))}
                               onResetLetter={onResetLetter}
                               onChange={onPlaceLetter}/>))
             }

@@ -43,7 +43,7 @@ const gameSlice = createSlice({
             commitWordState(state, state.word.join(''), "user")
 
             resetWordState(state)
-            state.lastSetLetter = { id: '', value: '' }
+            resetLetterState(state)
         },
         placeLetter(state, action) {
             const { letter, cell } = action.payload
@@ -54,20 +54,30 @@ const gameSlice = createSlice({
                 state.error = false
             }
 
-            placeLetterState(state, action.payload)
+            placeLetterOnFieldState(state, action.payload)
 
             if (state.lastSetLetter.id !== '') {
-                placeLetterState(state, { letter: '.', cell: state.lastSetLetter.id })
+                placeLetterOnFieldState(state, { letter: '.', cell: state.lastSetLetter.id })
             }
 
             resetWordState(state)
             state.lastSetLetter = { id: cell, value: letter.toUpperCase() }
-        }
+        },
+        removeLetter(state, action) {
+            const { cell } = action.payload
+
+            if (state.lastSetLetter.id === cell) {
+                placeLetterOnFieldState(state, { letter: '.', cell })
+                resetLetterState(state)
+                resetWordState(state)
+                state.error = false
+            }
+        },
     },
     extraReducers: (builder) => {
         builder
             .addCase(fetchComputerMove.fulfilled, (state, action) => {
-                placeLetterState(state, action.payload)
+                placeLetterOnFieldState(state, action.payload)
                 commitWordState(state, action.payload.word, "computer")
             })
             .addCase(fetchCreateNewField.fulfilled, (state, action) => {
@@ -91,8 +101,9 @@ const commitWordState = (state, word, player) => {
 }
 
 const resetWordState = (state) => state.word = []
+const resetLetterState = (state) => state.lastSetLetter = { id: '', value: '' }
 
-const placeLetterState = (state, { letter, cell }) => {
+const placeLetterOnFieldState = (state, { letter, cell }) => {
     const [x, y] = cell
     state.field[x][y] = letter.toUpperCase()
 }

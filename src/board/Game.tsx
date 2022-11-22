@@ -33,8 +33,7 @@ const Game = () => {
                 <div className="grid grid-flow-row auto-rows-max">
                     <Board/>
                     <br/>
-                    {allState.error &&
-                        <p className="h-10 px-6 font-semibold rounded-md text-red-900 dark:text-red-400">Error: {allState.error}</p>}
+                    {allState.errors.map((error,i) => <p key={`error${i}`} className="h-10 px-6 font-semibold rounded-md text-red-900 dark:text-red-400">Error: {error.message}</p>) }
                     <h2 className="font-medium leading-tight text-3xl mt-0 mb-2">Chosen
                         letter: {allState.lastSetLetter.value}</h2>
                     <h2 className="font-medium leading-tight text-3xl mt-0 mb-2">Chosen word: {allState.word}</h2>

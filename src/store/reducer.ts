@@ -16,7 +16,7 @@ const initialState = {
     wordsByComputer: [],
     scoreByUser: 0,
     scoreByComputer: 0,
-    error: false
+    errors: []
 }
 
 export const fetchComputerMove = createAsyncThunk(
@@ -51,15 +51,23 @@ const gameSlice = createSlice({
             state.wordPath = []
         },
         userMove(state, action) {
-            commitWordState(state, state.word.join(''), "user")
+            const word = state.word.join('')
+
+            checkForErrors(state, checkWordAlreadyUsed, [word, state.wordsUsed])
+            checkForErrors(state, checkUsedNewLetter, [state.lastSetLetter.id, state.wordPath])
+
+            if (state.errors.length > 0) return
+
+            commitWordState(state, word, "user")
 
             resetWordState(state)
             resetLetterState(state)
         },
         placeLetter(state, action) {
+            state.errors = []
             const { letter, cell } = action.payload
 
-            state.error = checkAlphabet(letter)
+            checkForErrors(state, checkAlphabet, letter)
 
             placeLetterOnFieldState(state, action.payload)
 
@@ -70,6 +78,8 @@ const gameSlice = createSlice({
             resetWordState(state)
             state.lastSetLetter = { id: cell, value: letter.toUpperCase() }
             state.wordPath = []
+
+            checkForErrors(state, checkLetterPlacedNearText, [cell, state.field])
         },
         removeLetter(state, action) {
             const { cell } = action.payload
@@ -78,13 +88,14 @@ const gameSlice = createSlice({
                 placeLetterOnFieldState(state, { letter: '.', cell })
                 resetLetterState(state)
                 resetWordState(state)
-                state.error = false
+                state.errors = []
             }
         },
     },
     extraReducers: (builder) => {
         builder
             .addCase(fetchComputerMove.fulfilled, (state, action) => {
+                if (state.errors.length > 0) return
                 const { letter, cell } = action.payload
 
                 placeLetterOnFieldState(state, { letter, cell: `${cell[0]}_${cell[1]}` })
@@ -113,8 +124,8 @@ const gameSlice = createSlice({
 })
 
 const commitWordState = (state, word, player) => {
-    const playerWords = player == "computer" ? "wordsByComputer" : "wordsByUser"
-    const playerScore = player == "computer" ? "scoreByComputer" : "scoreByUser"
+    const playerWords = player === "computer" ? "wordsByComputer" : "wordsByUser"
+    const playerScore = player === "computer" ? "scoreByComputer" : "scoreByUser"
 
     state.wordsUsed.push(word)
     state[playerWords].push(word)
@@ -129,7 +140,27 @@ const placeLetterOnFieldState = (state, { letter, cell }) => {
     state.field[x][y] = letter.toUpperCase()
 }
 
-const checkAlphabet = letter => !letter.match(cyrillicAlphabet) ? 'Letter should be from the alphabet' : ''
+const checkForErrors = (state, checkError, params) => {
+    const error = checkError(...params)
+    if(error.id) {
+        state.errors.push(error)
+    }
+}
+
+const emptyError = { id: '', message: '' }
+
+const checkAlphabet = letter => !letter.match(cyrillicAlphabet) ? { id: 'WrongAlphabet', message: 'Letter should be from the alphabet' } : emptyError
+const checkLetterPlacedNearText = (cell, field) => {
+    const [x, y] = cell.split('_').map(i => Number(i))
+    const directions = [[x - 1, y], [x + 1, y], [x, y - 1], [x, y + 1]]
+    const hasLetterInAdjacentCell = directions
+        .map(([xi, yi]) => field[xi]?.[yi])
+        .some(letter => letter !== '.' && letter !== undefined)
+
+    return !hasLetterInAdjacentCell ? { id: 'LetterFarFromAnyText', message: 'Place the letter near another letter' } : emptyError
+}
+const checkWordAlreadyUsed = (word, usedWords) => usedWords.includes(word) ? { id: 'WordAlreadyUsed', message: 'Word is already used' } : emptyError
+const checkUsedNewLetter = (cell, path) => !path.includes(cell) ? { id: 'NoNewLetterUsed', message: 'Use new letter' } : emptyError
 
 export const { userMove, updateWord, placeLetter, removeLetter, resetWord } = gameSlice.actions
 

@@ -6,8 +6,9 @@ import { RootState } from './store'
 const cyrillicAlphabet = /^\p{Script=Cyrillic}+$/u
 
 const initialState = {
+    fieldSize: 5,
+    difficulty: 'Medium',
     field: [[]],
-    fieldSize: 0,
     lastSetLetter: { id: '', value: '' },
     word: [],
     wordPath: [],
@@ -22,16 +23,16 @@ const initialState = {
 export const fetchComputerMove = createAsyncThunk(
     'moves/computer',
     async (word, { getState }) => {
-        const { field, wordsUsed } = getState()
-        return makeMove({ field, wordsUsed })
+        const { field, wordsUsed, difficulty } = getState()
+        return makeMove({ field, wordsUsed, difficulty })
     }
 )
 
 export const fetchHint = createAsyncThunk(
     'moves/user',
     async (word, { getState }) => {
-        const { field, wordsUsed } = getState()
-        return makeMove({ field, wordsUsed })
+        const { field, wordsUsed, difficulty } = getState()
+        return makeMove({ field, wordsUsed, difficulty })
     }
 )
 
@@ -41,6 +42,14 @@ const gameSlice = createSlice({
     name: 'game',
     initialState,
     reducers: {
+        setDifficulty(state, action) {
+            const { difficulty } = action.payload
+            state.difficulty = difficulty
+        },
+        setFieldSize(state, action) {
+            const { fieldSize } = action.payload
+            state.fieldSize = fieldSize
+        },
         updateWord(state, action) {
             const { letter, cell } = action.payload
             state.word.push(letter)
@@ -162,7 +171,7 @@ const checkLetterPlacedNearText = (cell, field) => {
 const checkWordAlreadyUsed = (word, usedWords) => usedWords.includes(word) ? { id: 'WordAlreadyUsed', message: 'Word is already used' } : emptyError
 const checkUsedNewLetter = (cell, path) => !path.includes(cell) ? { id: 'NoNewLetterUsed', message: 'Use new letter' } : emptyError
 
-export const { userMove, updateWord, placeLetter, removeLetter, resetWord } = gameSlice.actions
+export const { setDifficulty, userMove, updateWord, placeLetter, removeLetter, resetWord } = gameSlice.actions
 
 export default gameSlice.reducer
 

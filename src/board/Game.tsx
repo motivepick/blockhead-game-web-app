@@ -16,6 +16,8 @@ const Game = () => {
     const allState = useAppSelector(selectAll)
     const dispatch = useAppDispatch()
 
+    if(allState.field[0].length <= 0) return <div>Select field size</div>
+
     const onSubmitWord = async () => {
         if (allState.error) return
         dispatch(userMove())

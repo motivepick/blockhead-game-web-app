@@ -12,12 +12,14 @@ const initialState = {
     lastSetLetter: { id: '', value: '' },
     word: [],
     wordPath: [],
+    computerWordPath: [],
     wordsUsed: [],
     wordsByUser: [],
     wordsByComputer: [],
     scoreByUser: 0,
     scoreByComputer: 0,
-    errors: []
+    errors: [],
+    status: 'IDLE'
 }
 
 export const fetchComputerMove = createAsyncThunk(
@@ -50,6 +52,9 @@ const gameSlice = createSlice({
             const { fieldSize } = action.payload
             state.fieldSize = fieldSize
         },
+        setComputerWordPath(state, {payload}) {
+            state.computerWordPath = payload
+        },
         updateWord(state, action) {
             const { letter, cell } = action.payload
             state.word.push(letter)
@@ -71,6 +76,7 @@ const gameSlice = createSlice({
 
             resetWordState(state)
             resetLetterState(state)
+            state.wordPath = []
         },
         placeLetter(state, action) {
             state.errors = []
@@ -103,20 +109,24 @@ const gameSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
+            .addCase(fetchComputerMove.pending, (state) => {
+                state.status = 'PENDING'
+            })
             .addCase(fetchComputerMove.fulfilled, (state, action) => {
                 if (state.errors.length > 0) return
                 const { letter, cell } = action.payload
 
                 placeLetterOnFieldState(state, { letter, cell: `${cell[0]}_${cell[1]}` })
                 commitWordState(state, action.payload.word, "computer")
-                state.wordPath = action.payload.path.map(([x, y]) => `${x}_${y}`)
+                state.computerWordPath = action.payload.path.map(([x, y]) => `${x}_${y}`)
+                state.status = 'SUCCEEDED'
             })
             .addCase(fetchHint.fulfilled, (state, action) => {
                 const { letter, cell } = action.payload
                 const id = `${cell[0]}_${cell[1]}`
 
                 state.word = action.payload.word.split('')
-                state.wordPath = action.payload.path.map(([x, y]) => `${x}_${y}`)
+                state.computerWordPath = action.payload.path.map(([x, y]) => `${x}_${y}`)
 
                 placeLetterOnFieldState(state, { letter, cell: id })
                 state.lastSetLetter = { id, value: letter.toUpperCase() }
@@ -171,6 +181,6 @@ const checkLetterPlacedNearText = (cell, field) => {
 const checkWordAlreadyUsed = (word, usedWords) => usedWords.includes(word) ? { id: 'WordAlreadyUsed', message: 'Word is already used' } : emptyError
 const checkUsedNewLetter = (cell, path) => !path.includes(cell) ? { id: 'NoNewLetterUsed', message: 'Use new letter' } : emptyError
 
-export const { setDifficulty, userMove, updateWord, placeLetter, removeLetter, resetWord } = gameSlice.actions
+export const { setDifficulty, setComputerWordPath, userMove, updateWord, placeLetter, removeLetter, resetWord } = gameSlice.actions
 
 export default gameSlice.reducer

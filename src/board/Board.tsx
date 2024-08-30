@@ -1,9 +1,16 @@
-import React, {ChangeEvent, MouseEvent, useEffect} from 'react'
+import React, {ChangeEvent, MouseEvent, useEffect, useState} from 'react'
 import './board.css'
 import {useAppDispatch, useAppSelector} from '../store/hooks'
-import {placeLetter, removeLetter, updateWord} from '../store/reducer'
+import {placeLetter, removeLetter, setComputerWordPath, updateWord} from '../store/reducer'
 import Cell from './Cell'
-import {selectAll, selectField, selectLastSetLetterValue, selectWordPath} from "../store/selectors"
+import {
+    selectAll,
+    selectComputerWordPath,
+    selectField,
+    selectLastSetLetterValue,
+    selectStatus,
+    selectWordPath
+} from "../store/selectors"
 
 const adjacentCells = (i: number, j: number) => [
     [i - 1, j],
@@ -29,13 +36,17 @@ const Board = () => {
     const allState = useAppSelector(selectAll)
     const field = useAppSelector(selectField)
     const wordPath = useAppSelector(selectWordPath)
+    const computerWordPath = useAppSelector(selectComputerWordPath)
     const lastSetLetterValue = useAppSelector(selectLastSetLetterValue)
+    const status = useAppSelector(selectStatus)
     const dispatch = useAppDispatch()
 
     const onPlaceLetter = (event: ChangeEvent<HTMLInputElement>) => dispatch(placeLetter({
         letter: event.target.value,
         cell: event.target.id
     }))
+
+    const [displayableComputerWord, setDisplayableComputerWord] = useState<string[]>([])
 
     const onResetLetter = (event: MouseEvent<HTMLDivElement>) => {
         event.preventDefault()
@@ -44,9 +55,12 @@ const Board = () => {
     }
 
     useEffect(() => {
-        console.log('Computer word path:', wordPath)
-
-    }, [wordPath]);
+        if (computerWordPath.length) {
+            setTimeout(() => {
+                dispatch(setComputerWordPath([]))
+            }, 3000)
+        }
+    }, [computerWordPath]);
 
     return (
         <div className="container dark:bg-gray-400">
@@ -62,11 +76,11 @@ const Board = () => {
                         <Cell
                             key={`${i}_${j}`}
                             id={`${i}_${j}`}
-                            highlight={wordPath.includes(`${i}_${j}`)}
+                            highlight={wordPath.includes(`${i}_${j}`) || computerWordPath.includes(`${i}_${j}`)}
                             letter={l}
                             value={l}
-                            editable={!lastSetLetterValue && hasLetterInAdjacentCell(i, j, field)}
-                            selectable={!!lastSetLetterValue && (wordPath.length === 0 || isAdjacentToLastSelectedCell(i, j, wordPath))}
+                            editable={status !== 'PENDING' && computerWordPath.length === 0 && !lastSetLetterValue && hasLetterInAdjacentCell(i, j, field)}
+                            selectable={status !== 'PENDING' && computerWordPath.length === 0 && !!lastSetLetterValue && (wordPath.length === 0 || isAdjacentToLastSelectedCell(i, j, wordPath))}
                             onSelectWord={(letter: string) => dispatch(updateWord({letter, cell: `${i}_${j}`}))}
                             onResetLetter={onResetLetter}
                             onChange={onPlaceLetter}

@@ -1,6 +1,6 @@
 import React from 'react'
-import { useAppSelector } from '../store/hooks'
-import { selectAll } from '../store/reducer'
+import {useAppSelector} from '../store/hooks'
+import {selectAll} from "../store/selectors"
 
 const zip: (a: Words, b: Words) => Words[] = (a, b) => Array
     .from(Array(Math.max(a.length, b.length)).keys())

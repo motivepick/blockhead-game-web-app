@@ -15,7 +15,7 @@ export const makeMove = async ({ field, wordsUsed, difficulty }: { field: Field,
 
 export const createNewField = async (size: Number = 3): Promise<Field> => {
     try {
-        const response = await api.get(`/field/${size}`)
+        const response = await api.get(`/field`, {params: {size}})
         const rawField = response.data as string[]
         return rawField.map(row => row.split(''))
     } catch (error) {

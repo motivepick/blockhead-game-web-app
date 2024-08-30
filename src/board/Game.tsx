@@ -4,19 +4,19 @@ import { useAppDispatch, useAppSelector } from '../store/hooks'
 import {
     fetchComputerMove,
     userMove,
-    selectAll,
     resetWord,
     fetchHint
 } from '../store/reducer'
 import Board from './Board'
 import ScoreBoard from './ScoreBoard'
+import {selectAll} from "../store/selectors";
 
 
 const Game = () => {
     const allState = useAppSelector(selectAll)
     const dispatch = useAppDispatch()
 
-    if(allState.field[0].length <= 0) return <div>Select field size</div>
+    if (allState.field[0].length <= 0) return <div>Select field size</div>
 
     const onSubmitWord = async () => {
         if (allState.error) return

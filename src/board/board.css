@@ -22,6 +22,10 @@
     font-size: 3rem;
     font-weight: bold;
     background: white;
+    cursor: default;
+}
+
+.selectable {
     cursor: pointer;
 }
 

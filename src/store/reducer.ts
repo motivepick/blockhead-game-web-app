@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import { makeMove, createNewField } from '../api/service'
-import {selectLastSetLetterId} from "./selectors";
+import {selectFieldSize, selectLastSetLetterId} from "./selectors";
 
 const cyrillicAlphabet = /^\p{Script=Cyrillic}+$/u
 
@@ -131,12 +131,15 @@ const gameSlice = createSlice({
                 placeLetterOnFieldState(state, { letter, cell: id })
                 state.lastSetLetter = { id, value: letter.toUpperCase() }
             })
+            .addCase(fetchCreateNewField.pending, (state) => {
+                const fieldSize = selectFieldSize(state)
+                state.field = Array.from({ length: fieldSize }, () => Array.from({ length: fieldSize }, () => '.'))
+            })
             .addCase(fetchCreateNewField.fulfilled, (state, action) => {
                 const field = action.payload
                 const word = field[Math.floor(field.length / 2)].join('')
 
                 state.field = field
-                state.fieldSize = field.length
                 state.wordsUsed.push(word)
             })
     },
@@ -181,6 +184,6 @@ const checkLetterPlacedNearText = (cell, field) => {
 const checkWordAlreadyUsed = (word, usedWords) => usedWords.includes(word) ? { id: 'WordAlreadyUsed', message: 'Word is already used' } : emptyError
 const checkUsedNewLetter = (cell, path) => !path.includes(cell) ? { id: 'NoNewLetterUsed', message: 'Use new letter' } : emptyError
 
-export const { setDifficulty, setComputerWordPath, userMove, updateWord, placeLetter, removeLetter, resetWord } = gameSlice.actions
+export const { setDifficulty, setFieldSize, setComputerWordPath, userMove, updateWord, placeLetter, removeLetter, resetWord } = gameSlice.actions
 
 export default gameSlice.reducer

@@ -8,3 +8,5 @@ export const selectWordPath = (state: RootState): string[] => state.wordPath
 export const selectComputerWordPath = (state: RootState): string[] => state.computerWordPath
 export const selectComputerWordPathLength = (state: RootState): number => state.computerWordPath.length
 export const selectStatus = (state: RootState): string => state.status
+export const selectFieldSize = (state: RootState): number => state.fieldSize
+export const selectDifficulty = (state: RootState): string => state.difficulty

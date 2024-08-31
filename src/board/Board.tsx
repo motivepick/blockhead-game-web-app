@@ -4,10 +4,10 @@ import {useAppDispatch, useAppSelector} from '../store/hooks'
 import {placeLetter, removeLetter, resetHinting, setComputerWordPath, updateWord} from '../store/reducer'
 import Cell from './Cell'
 import {
-    selectAll,
     selectComputerWordPath,
     selectComputerWordPathLength,
     selectField,
+    selectFieldSize,
     selectHinting,
     selectLastSetLetterValue,
     selectStatus,
@@ -35,8 +35,8 @@ const isAdjacentToLastSelectedCell = (i: number, j: number, wordPath: string[]):
 };
 
 const Board = () => {
-    const allState = useAppSelector(selectAll)
     const field = useAppSelector(selectField)
+    const fieldSize = useAppSelector(selectFieldSize)
     const wordPath = useAppSelector(selectWordPath)
     const computerWordPath = useAppSelector(selectComputerWordPath)
     const computerWordPathLength = useAppSelector(selectComputerWordPathLength)
@@ -78,8 +78,8 @@ const Board = () => {
             <div
                 className="grid"
                 style={{
-                    gridTemplateColumns: `repeat(${allState.fieldSize}, 80px)`,
-                    gridTemplateRows: `repeat(${allState.fieldSize}, 80px)`
+                    gridTemplateColumns: `repeat(${fieldSize}, 80px)`,
+                    gridTemplateRows: `repeat(${fieldSize}, 80px)`
                 }}
             >
                 {

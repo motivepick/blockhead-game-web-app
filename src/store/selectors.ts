@@ -11,3 +11,4 @@ export const selectComputerWordPathLength = (state: RootState): number => state.
 export const selectStatus = (state: RootState): string => state.status
 export const selectFieldSize = (state: RootState): number => state.fieldSize
 export const selectDifficulty = (state: RootState): string => state.difficulty
+export const selectHinting = (state: RootState): boolean => state.hinting

@@ -1,13 +1,14 @@
 import React, {ChangeEvent, MouseEvent, useEffect, useState} from 'react'
 import './board.css'
 import {useAppDispatch, useAppSelector} from '../store/hooks'
-import {placeLetter, removeLetter, setComputerWordPath, updateWord} from '../store/reducer'
+import {placeLetter, removeLetter, resetHinting, setComputerWordPath, updateWord} from '../store/reducer'
 import Cell from './Cell'
 import {
     selectAll,
     selectComputerWordPath,
     selectComputerWordPathLength,
     selectField,
+    selectHinting,
     selectLastSetLetterValue,
     selectStatus,
     selectWordPath
@@ -41,6 +42,7 @@ const Board = () => {
     const computerWordPathLength = useAppSelector(selectComputerWordPathLength)
     const lastSetLetterValue = useAppSelector(selectLastSetLetterValue)
     const status = useAppSelector(selectStatus)
+    const hinting = useAppSelector(selectHinting)
     const dispatch = useAppDispatch()
 
     const onPlaceLetter = (event: ChangeEvent<HTMLInputElement>) => dispatch(placeLetter({
@@ -60,6 +62,9 @@ const Board = () => {
         if (index == computerWordPathLength) {
             setIndex(0)
             dispatch(setComputerWordPath([]))
+            if (hinting) {
+                dispatch(resetHinting())
+            }
         } else {
             const highlightNextCell = setTimeout(() => {
                 setIndex(index => index + 1)

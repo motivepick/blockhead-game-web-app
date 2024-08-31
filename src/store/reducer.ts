@@ -19,7 +19,8 @@ const initialState = {
     scoreByUser: 0,
     scoreByComputer: 0,
     errors: [],
-    status: 'IDLE'
+    status: 'IDLE',
+    hinting: false
 }
 
 export const fetchComputerMove = createAsyncThunk(
@@ -63,6 +64,12 @@ const gameSlice = createSlice({
         resetWord(state){
             resetWordState(state)
             state.wordPath = []
+        },
+        resetHinting(state) {
+            placeLetterOnFieldState(state, { letter: '.', cell: state.lastSetLetter.id })
+            state.lastSetLetter = {id: '', value: ''}
+            state.word = []
+            state.hinting = false
         },
         userMove(state) {
             const word = state.word.join('')
@@ -130,6 +137,7 @@ const gameSlice = createSlice({
 
                 placeLetterOnFieldState(state, { letter, cell: id })
                 state.lastSetLetter = { id, value: letter.toUpperCase() }
+                state.hinting = true
             })
             .addCase(fetchCreateNewField.pending, (state) => {
                 const fieldSize = selectFieldSize(state)
@@ -184,6 +192,6 @@ const checkLetterPlacedNearText = (cell, field) => {
 const checkWordAlreadyUsed = (word, usedWords) => usedWords.includes(word) ? { id: 'WordAlreadyUsed', message: 'Word is already used' } : emptyError
 const checkUsedNewLetter = (cell, path) => !path.includes(cell) ? { id: 'NoNewLetterUsed', message: 'Use new letter' } : emptyError
 
-export const { setDifficulty, setFieldSize, setComputerWordPath, userMove, updateWord, placeLetter, removeLetter, resetWord } = gameSlice.actions
+export const { setDifficulty, setFieldSize, resetHinting, setComputerWordPath, userMove, updateWord, placeLetter, removeLetter, resetWord } = gameSlice.actions
 
 export default gameSlice.reducer

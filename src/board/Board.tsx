@@ -1,4 +1,4 @@
-import React, {ChangeEvent, MouseEvent, useEffect, useState} from 'react'
+import React, {ChangeEvent, MouseEvent, useEffect, useRef, useState} from 'react'
 import './board.css'
 import {useAppDispatch, useAppSelector} from '../store/hooks'
 import {placeLetter, removeLetter, setComputerWordPath, updateWord} from '../store/reducer'
@@ -46,7 +46,9 @@ const Board = () => {
         cell: event.target.id
     }))
 
-    const [displayableComputerWord, setDisplayableComputerWord] = useState<string[]>([])
+    const string = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']
+    const [placeholder, setPlaceholder] = useState<string[]>([])
+    const index = useRef(0)
 
     const onResetLetter = (event: MouseEvent<HTMLDivElement>) => {
         event.preventDefault()
@@ -55,15 +57,19 @@ const Board = () => {
     }
 
     useEffect(() => {
-        if (computerWordPath.length) {
-            setTimeout(() => {
-                dispatch(setComputerWordPath([]))
-            }, 3000)
+        function tick() {
+            setPlaceholder(prev => prev.concat(string[index.current]));
+            index.current++;
         }
-    }, [computerWordPath]);
+        if (index.current < string.length) {
+            let addChar = setInterval(tick, 500);
+            return () => clearInterval(addChar);
+        }
+    }, [placeholder]);
 
     return (
         <div className="container dark:bg-gray-400">
+            <div>{placeholder}</div>
             <div
                 className="grid"
                 style={{

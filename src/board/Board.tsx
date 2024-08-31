@@ -1,4 +1,4 @@
-import React, {ChangeEvent, MouseEvent, useEffect, useRef, useState} from 'react'
+import React, {ChangeEvent, MouseEvent, useEffect, useState} from 'react'
 import './board.css'
 import {useAppDispatch, useAppSelector} from '../store/hooks'
 import {placeLetter, removeLetter, setComputerWordPath, updateWord} from '../store/reducer'
@@ -6,6 +6,7 @@ import Cell from './Cell'
 import {
     selectAll,
     selectComputerWordPath,
+    selectComputerWordPathLength,
     selectField,
     selectLastSetLetterValue,
     selectStatus,
@@ -37,6 +38,7 @@ const Board = () => {
     const field = useAppSelector(selectField)
     const wordPath = useAppSelector(selectWordPath)
     const computerWordPath = useAppSelector(selectComputerWordPath)
+    const computerWordPathLength = useAppSelector(selectComputerWordPathLength)
     const lastSetLetterValue = useAppSelector(selectLastSetLetterValue)
     const status = useAppSelector(selectStatus)
     const dispatch = useAppDispatch()
@@ -55,18 +57,16 @@ const Board = () => {
     }
 
     useEffect(() => {
-        function tick() {
-            setIndex(prevState => prevState + 1)
-        }
-        console.log('index', index)
-        if (index < computerWordPath.length) {
-            const addChar = setInterval(tick, 300);
-            return () => clearInterval(addChar);
-        } else if (index > 0 && index == computerWordPath.length) {
+        if (index == computerWordPathLength) {
             setIndex(0)
             dispatch(setComputerWordPath([]))
+        } else {
+            const highlightNextCell = setTimeout(() => {
+                setIndex(index => index + 1)
+            }, 300);
+            return () => clearTimeout(highlightNextCell);
         }
-    }, [computerWordPath, index]);
+    }, [computerWordPathLength, index])
 
     return (
         <div className="container dark:bg-gray-400">

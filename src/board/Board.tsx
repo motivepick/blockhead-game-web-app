@@ -74,7 +74,7 @@ const Board = () => {
     }, [computerWordPathLength, index])
 
     return (
-        <div className="container dark:bg-gray-400">
+        <div className="board-container dark:bg-gray-400">
             <div
                 className="grid"
                 style={{

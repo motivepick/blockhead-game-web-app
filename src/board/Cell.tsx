@@ -34,7 +34,7 @@ const Cell = ({id, highlight, letter, value, editable, selectable, onSelectWord,
         )
     }
 
-    const background = selectable ? "bg-white dark:bg-gray-500" : "bg-white dark:bg-slate-600"
+    const background = selectable ? "dark:bg-gray-500" : "dark:bg-slate-600"
     return (
         <div
             className={`cell dark:text-gray-100 ${highlight ? 'bg-indigo-200 dark:bg-indigo-600' : background} ${selectable ? 'selectable' : ''}`}

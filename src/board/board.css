@@ -2,7 +2,7 @@
     --main-cell-color: white;
 }
 
-.container {
+.board-container {
     background: black;
     display: inline-block;
     border: 5px solid black;

@@ -1,10 +1,19 @@
 // @ts-nocheck
 import React, {useEffect} from 'react'
-import Game from './board/Game'
-import {useAppDispatch} from './store/hooks'
-import {fetchCreateNewField, setDifficulty, setFieldSize} from './store/reducer'
+import {useAppDispatch, useAppSelector} from './store/hooks'
+import {
+    fetchComputerMove,
+    fetchCreateNewField,
+    fetchHint,
+    resetWord,
+    setDifficulty,
+    setFieldSize,
+    userMove
+} from './store/reducer'
 import {useSelector} from "react-redux";
-import {selectDifficulty, selectFieldSize} from "./store/selectors";
+import {selectAll, selectDifficulty, selectFieldSize} from "./store/selectors";
+import Board from "./board/Board";
+import ScoreBoard from "./board/ScoreBoard";
 
 const SelectDifficultyDropdown = () => {
     const dispatch = useAppDispatch()
@@ -38,7 +47,7 @@ const Dropdown = ({defaultValue, data, onSelect}) => {
     return (
         <div className="relative w-full lg:max-w-sm">
             <select
-                className="w-full p-2.5 bg-white dark:bg-slate-700 text-gray-500 dark:text-white border dark:border-slate-600 rounded-md shadow-sm outline-none appearance-none focus:border-indigo-600"
+                className="w-full p-2.5 dark:bg-slate-700 text-gray-500 dark:text-white border dark:border-slate-600 rounded-md shadow-sm outline-none appearance-none focus:border-indigo-600"
                 onChange={onSelect}
                 defaultValue={defaultValue}
             >
@@ -54,16 +63,65 @@ const App = () => {
     useEffect(() => {
         dispatch(fetchCreateNewField(fieldSize))
     }, [fieldSize])
+    const allState = useAppSelector(selectAll)
 
-    return <div className="dark h-full min-h-full min-h-screen">
-        <div className="h-full min-h-full min-h-screen bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
-            <SelectDifficultyDropdown/>
-            <SelectFieldSizeDropdown/>
-            <h1 className="font-medium leading-tight text-5xl mt-0 mb-2 text-center">Blockhead</h1>
-            <br/>
-            <Game/>
+    if (allState.field[0].length <= 0) return <div>Select field size</div>
+
+    const onSubmitWord = async () => {
+        if (allState.error) return
+        dispatch(userMove())
+        dispatch(fetchComputerMove())
+    }
+
+    const onResetWord = () => dispatch(resetWord())
+
+    const onHint = () => dispatch(fetchHint())
+
+    return (
+        <div className="min-h-screen bg-white dark:bg-gray-800">
+            <div className="container mx-auto">
+                <div className="flex flex-row flex-wrap py-4">
+                    <div role="main" className="w-full sm:w-2/3 md:w-3/4 pt-1 px-2">
+                        <Board/>
+                        <br/>
+                        {allState.errors.map((error, i) =>
+                            <p
+                                key={`error${i}`}
+                                className="h-10 px-6 font-semibold rounded-md text-red-900 dark:text-red-400"
+                            >
+                                Error: {error.message}
+                            </p>
+                        )}
+                        <h2 className="font-medium leading-tight text-3xl mt-0 mb-2">Chosen
+                            letter: {allState.lastSetLetter.value}</h2>
+                        <h2 className="font-medium leading-tight text-3xl mt-0 mb-2">Chosen word: {allState.word}</h2>
+                        <br/>
+                        <>
+                            <button
+                                className="h-10 px-6 font-semibold rounded-md border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-gray-200"
+                                type="button" onClick={onSubmitWord}>Submit chosen word
+                            </button>
+                            <button
+                                className="h-10 px-6 font-semibold rounded-md border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-gray-200"
+                                type="button" onClick={onResetWord}>Reset chosen word
+                            </button>
+                            <button
+                                className="h-10 px-6 font-semibold rounded-md border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-gray-200"
+                                type="button" onClick={onHint}>Hint
+                            </button>
+                        </>
+                    </div>
+                    <div className="w-full sm:w-1/3 md:w-1/4 px-2">
+                        <div className="sticky top-0 p-4 w-full">
+                            <ul className="flex flex-col overflow-hidden">
+                                <ScoreBoard/>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
+    )
 }
 
 export default App

@@ -46,9 +46,7 @@ const Board = () => {
         cell: event.target.id
     }))
 
-    const string = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']
-    const [placeholder, setPlaceholder] = useState<string[]>([])
-    const index = useRef(0)
+    const [index, setIndex] = useState(0)
 
     const onResetLetter = (event: MouseEvent<HTMLDivElement>) => {
         event.preventDefault()
@@ -58,18 +56,20 @@ const Board = () => {
 
     useEffect(() => {
         function tick() {
-            setPlaceholder(prev => prev.concat(string[index.current]));
-            index.current++;
+            setIndex(prevState => prevState + 1)
         }
-        if (index.current < string.length) {
-            let addChar = setInterval(tick, 500);
+        console.log('index', index)
+        if (index < computerWordPath.length) {
+            const addChar = setInterval(tick, 300);
             return () => clearInterval(addChar);
+        } else if (index > 0 && index == computerWordPath.length) {
+            setIndex(0)
+            dispatch(setComputerWordPath([]))
         }
-    }, [placeholder]);
+    }, [computerWordPath, index]);
 
     return (
         <div className="container dark:bg-gray-400">
-            <div>{placeholder}</div>
             <div
                 className="grid"
                 style={{
@@ -82,7 +82,7 @@ const Board = () => {
                         <Cell
                             key={`${i}_${j}`}
                             id={`${i}_${j}`}
-                            highlight={wordPath.includes(`${i}_${j}`) || computerWordPath.includes(`${i}_${j}`)}
+                            highlight={wordPath.includes(`${i}_${j}`) || computerWordPath.slice(0, index + 1).includes(`${i}_${j}`)}
                             letter={l}
                             value={l}
                             editable={status !== 'PENDING' && computerWordPath.length === 0 && !lastSetLetterValue && hasLetterInAdjacentCell(i, j, field)}

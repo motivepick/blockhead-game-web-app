@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import { makeMove, createNewField } from '../api/service'
-import {selectFieldSize, selectLastSetLetterId} from "./selectors";
+import {selectDifficulty, selectField, selectFieldSize, selectLastSetLetterId, selectWordsUsed} from "./selectors";
 
 const cyrillicAlphabet = /^\p{Script=Cyrillic}+$/u
 
@@ -25,16 +25,16 @@ const initialState = {
 export const fetchComputerMove = createAsyncThunk(
     'moves/computer',
     async (word, { getState }) => {
-        const { field, wordsUsed, difficulty } = getState()
-        return makeMove({ field, wordsUsed, difficulty })
+        const state = getState()
+        return makeMove({ field: selectField(state), wordsUsed: selectWordsUsed(state), difficulty: selectDifficulty(state) })
     }
 )
 
 export const fetchHint = createAsyncThunk(
     'moves/user',
     async (word, { getState }) => {
-        const { field, wordsUsed, difficulty } = getState()
-        return makeMove({ field, wordsUsed, difficulty })
+        const state = getState()
+        return makeMove({ field: selectField(state), wordsUsed: selectWordsUsed(state), difficulty: 'Hard' })
     }
 )
 

@@ -75,7 +75,10 @@ const Board = () => {
 
     return (
         <div className="board-container bg-black dark:bg-gray-900"> {/* Change Board.css if changing bg-gray-900. */}
-            <div className={`grid grid-cols-${fieldSize}`}>
+            <div
+                className="grid"
+                style={{gridTemplateColumns: `repeat(${fieldSize}, minmax(0, 1fr))`}}
+            >
                 {
                     field.flatMap((row, i) => row.map((l, j) =>
                         <Cell

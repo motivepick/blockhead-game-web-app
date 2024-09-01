@@ -81,8 +81,8 @@ const App = () => {
 
     return (
         <Background>
-            <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-4 p-6">
-                <div className="md:col-span-2 p-6">
+            <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-4 p-2">
+                <div className="md:col-span-2">
                     <Board/>
                     <br/>
                     {allState.errors.map((error, i) =>
@@ -118,7 +118,7 @@ const App = () => {
                         Hint
                     </button>
                 </div>
-                <div className="p-6">
+                <div className="md:col-span-1">
                     <SelectDifficultyDropdown/>
                     <SelectFieldSizeDropdown/>
                     <ScoreBoard/>

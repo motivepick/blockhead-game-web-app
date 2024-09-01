@@ -1,5 +1,5 @@
 import React, {ChangeEvent, MouseEvent, useEffect, useState} from 'react'
-import './board.css'
+import './Board.css'
 import {useAppDispatch, useAppSelector} from '../store/hooks'
 import {placeLetter, removeLetter, resetHinting, setComputerWordPath, updateWord} from '../store/reducer'
 import Cell from './Cell'
@@ -74,21 +74,14 @@ const Board = () => {
     }, [computerWordPathLength, index])
 
     return (
-        <div className="board-container bg-black dark:bg-gray-900"> {/* Change board.css if changing bg-gray-900. */}
-            <div
-                className="grid"
-                style={{
-                    gridTemplateColumns: `repeat(${fieldSize}, 80px)`,
-                    gridTemplateRows: `repeat(${fieldSize}, 80px)`
-                }}
-            >
+        <div className="board-container bg-black dark:bg-gray-900"> {/* Change Board.css if changing bg-gray-900. */}
+            <div className={`grid grid-cols-${fieldSize}`}>
                 {
                     field.flatMap((row, i) => row.map((l, j) =>
                         <Cell
                             key={`${i}_${j}`}
                             id={`${i}_${j}`}
                             highlight={wordPath.includes(`${i}_${j}`) || computerWordPath.slice(0, index + 1).includes(`${i}_${j}`)}
-                            letter={l}
                             value={l}
                             editable={status !== 'PENDING' && computerWordPath.length === 0 && !lastSetLetterValue && hasLetterInAdjacentCell(i, j, field)}
                             selectable={status !== 'PENDING' && computerWordPath.length === 0 && !!lastSetLetterValue && (wordPath.length === 0 || isAdjacentToLastSelectedCell(i, j, wordPath))}

@@ -1,11 +1,10 @@
 import React, {useCallback} from 'react'
-import './board.css'
+import './Board.css'
 import {ACTIONABLE_BG_COLOR, HIGHLIGHTED_BG_COLOR, NON_ACTIONABLE_BG_COLOR, TEXT_COLOR} from "../const";
 
 type TCell = {
     id: string,
     highlight: boolean,
-    letter: string,
     value: string,
     editable: boolean,
     selectable: boolean,
@@ -14,12 +13,12 @@ type TCell = {
     onResetLetter: (e: React.MouseEvent<HTMLDivElement>) => void
 }
 
-const Cell = ({id, highlight, letter, value, editable, selectable, onSelectWord, onResetLetter, onChange}: TCell) => {
+const Cell = ({id, highlight, value, editable, selectable, onSelectWord, onResetLetter, onChange}: TCell) => {
     const selectCell = useCallback(() => {
-        selectable && onSelectWord(letter)
-    }, [selectable, letter])
+        selectable && onSelectWord(value)
+    }, [selectable, value])
 
-    if (letter === '.') {
+    if (value === '.') {
         return (
             <div className="cell" id={id}>
                 <input
@@ -42,7 +41,7 @@ const Cell = ({id, highlight, letter, value, editable, selectable, onSelectWord,
             id={id}
             onClick={selectCell}
             onContextMenu={onResetLetter}>
-            {letter}
+            {value}
         </div>
     )
 }

@@ -28,11 +28,18 @@
 .cell {
     justify-content: center;
     align-items: center;
+    aspect-ratio: 1 / 1;
     display: flex;
     font-family: Arial;
-    font-size: 3rem;
+    font-size: 2rem;
     font-weight: bold;
     cursor: default;
+}
+
+@media screen(sm) {
+    .cell {
+        font-size: 3rem;
+    }
 }
 
 .selectable {
@@ -63,8 +70,4 @@ input:focus {
     align-self: center;
 
     outline:none!important;
-}
-
-.selectedCell {
-    background-color: cornflowerblue;
 }

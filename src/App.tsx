@@ -78,47 +78,39 @@ const App = () => {
     const onHint = () => dispatch(fetchHint())
 
     return (
-        <div className="min-h-screen bg-white dark:bg-gray-800">
-            <div className="container mx-auto">
-                <div className="flex flex-row flex-wrap py-4">
-                    <div role="main" className="w-full sm:w-2/3 md:w-3/4 pt-1 px-2">
-                        <Board/>
-                        <br/>
-                        {allState.errors.map((error, i) =>
-                            <p
-                                key={`error${i}`}
-                                className="h-10 px-6 font-semibold rounded-md text-red-900 dark:text-red-400"
-                            >
-                                Error: {error.message}
-                            </p>
-                        )}
-                        <h2 className="font-medium leading-tight text-3xl mt-0 mb-2">Chosen
-                            letter: {allState.lastSetLetter.value}</h2>
-                        <h2 className="font-medium leading-tight text-3xl mt-0 mb-2">Chosen word: {allState.word}</h2>
-                        <br/>
-                        <>
-                            <button
-                                className="h-10 px-6 font-semibold rounded-md border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-gray-200"
-                                type="button" onClick={onSubmitWord}>Submit chosen word
-                            </button>
-                            <button
-                                className="h-10 px-6 font-semibold rounded-md border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-gray-200"
-                                type="button" onClick={onResetWord}>Reset chosen word
-                            </button>
-                            <button
-                                className="h-10 px-6 font-semibold rounded-md border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-gray-200"
-                                type="button" onClick={onHint}>Hint
-                            </button>
-                        </>
-                    </div>
-                    <div className="w-full sm:w-1/3 md:w-1/4 px-2">
-                        <div className="sticky top-0 p-4 w-full">
-                            <ul className="flex flex-col overflow-hidden">
-                                <ScoreBoard/>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
+        <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-4 p-6">
+            <div className="md:col-span-2 bg-white p-6 shadow-md rounded">
+                <Board/>
+                <br/>
+                {allState.errors.map((error, i) =>
+                    <p
+                        key={`error${i}`}
+                        className="h-10 px-6 font-semibold rounded-md text-red-900 dark:text-red-400"
+                    >
+                        Error: {error.message}
+                    </p>
+                )}
+                <h2 className="font-medium leading-tight text-3xl mt-0 mb-2">Chosen
+                    letter: {allState.lastSetLetter.value}</h2>
+                <h2 className="font-medium leading-tight text-3xl mt-0 mb-2">Chosen word: {allState.word}</h2>
+                <br/>
+                <>
+                    <button
+                        className="h-10 px-6 font-semibold rounded-md border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-gray-200"
+                        type="button" onClick={onSubmitWord}>Submit chosen word
+                    </button>
+                    <button
+                        className="h-10 px-6 font-semibold rounded-md border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-gray-200"
+                        type="button" onClick={onResetWord}>Reset chosen word
+                    </button>
+                    <button
+                        className="h-10 px-6 font-semibold rounded-md border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-gray-200"
+                        type="button" onClick={onHint}>Hint
+                    </button>
+                </>
+            </div>
+            <div className="bg-gray-100 p-6 shadow-md rounded">
+                <ScoreBoard/>
             </div>
         </div>
     )

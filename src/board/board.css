@@ -3,9 +3,20 @@
 }
 
 .board-container {
-    background: black;
     display: inline-block;
-    border: 5px solid black;
+}
+
+@media (prefers-color-scheme: light) {
+    .board-container {
+        border: 5px solid black;
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    .board-container {
+        /* The border color should match the dark:bg-gray-900 from Board.tsx. */
+        border: 5px solid rgb(17 24 39);
+    }
 }
 
 .grid {
@@ -21,7 +32,6 @@
     font-family: Arial;
     font-size: 3rem;
     font-weight: bold;
-    background: white;
     cursor: default;
 }
 
@@ -30,7 +40,6 @@
 }
 
 input {
-    background-color: var(--main-cell-color);
     width: 100%;
     height: 100%;
 
@@ -45,7 +54,6 @@ input {
 }
 
 input:focus {
-    background-color: var(--main-cell-color);
     width: 100%;
     height: 100%;
 

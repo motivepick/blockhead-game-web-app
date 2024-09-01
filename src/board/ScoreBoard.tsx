@@ -1,6 +1,7 @@
 import React from 'react'
 import {useAppSelector} from '../store/hooks'
 import {selectAll} from "../store/selectors"
+import {TEXT_COLOR} from "../const";
 
 const zip: (a: Words, b: Words) => Words[] = (a, b) => Array
     .from(Array(Math.max(a.length, b.length)).keys())
@@ -11,7 +12,7 @@ const ScoreBoard = () => {
 
     return (
         <table className="min-w-full">
-            <caption>Scoreboard</caption>
+            <caption className={TEXT_COLOR}>Scoreboard</caption>
             <thead
                 className="border-b  bg-indigo-100 border-indigo-200 dark:bg-slate-700 dark:border-slate-600">
             <tr>

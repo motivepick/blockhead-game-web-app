@@ -64,7 +64,7 @@ const App = () => {
     const fieldSize = useSelector(selectFieldSize)
     useEffect(() => {
         dispatch(fetchCreateNewField(fieldSize))
-    }, [fieldSize])
+    }, [dispatch, fieldSize])
     const allState = useAppSelector(selectAll)
 
     if (allState.field[0].length <= 0) return <div>Select field size</div>
@@ -93,8 +93,6 @@ const App = () => {
                             Error: {error.message}
                         </p>
                     )}
-                    <h2 className={`font-medium leading-tight text-3xl mt-0 mb-2 ${TEXT_COLOR}`}>Chosen letter: {allState.lastSetLetter.value}</h2>
-                    <h2 className={`font-medium leading-tight text-3xl mt-0 mb-2 ${TEXT_COLOR}`}>Chosen word: {allState.word}</h2>
                     <br/>
                     <button
                         className="h-10 px-6 font-semibold rounded-md border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-gray-200"

@@ -1,7 +1,14 @@
 import React, {ChangeEvent, MouseEvent, useEffect, useState} from 'react'
 import './Board.css'
 import {useAppDispatch, useAppSelector} from '../store/hooks'
-import {placeLetter, removeLetter, resetHinting, setComputerWordPath, updateWord} from '../store/reducer'
+import {
+    placeLetter,
+    removeLetter,
+    resetHinting,
+    resetLastSetLetter,
+    setComputerWordPath,
+    updateWord
+} from '../store/reducer'
 import Cell from './Cell'
 import {
     selectComputerWordPath,
@@ -9,7 +16,7 @@ import {
     selectField,
     selectFieldSize,
     selectHinting,
-    selectLastSetLetterValue,
+    selectLastSetLetterId,
     selectStatus,
     selectWordPath
 } from "../store/selectors"
@@ -40,7 +47,7 @@ const Board = () => {
     const wordPath = useAppSelector(selectWordPath)
     const computerWordPath = useAppSelector(selectComputerWordPath)
     const computerWordPathLength = useAppSelector(selectComputerWordPathLength)
-    const lastSetLetterValue = useAppSelector(selectLastSetLetterValue)
+    const lastSetLetterId = useAppSelector(selectLastSetLetterId)
     const status = useAppSelector(selectStatus)
     const hinting = useAppSelector(selectHinting)
     const dispatch = useAppDispatch()
@@ -59,19 +66,20 @@ const Board = () => {
     }
 
     useEffect(() => {
-        if (index == computerWordPathLength) {
-            setIndex(0)
-            dispatch(setComputerWordPath([]))
+        if (index === computerWordPathLength) {
             if (hinting) {
                 dispatch(resetHinting())
             }
+            setIndex(0)
+            dispatch(resetLastSetLetter())
+            dispatch(setComputerWordPath([]))
         } else {
             const highlightNextCell = setTimeout(() => {
                 setIndex(index => index + 1)
             }, 300);
             return () => clearTimeout(highlightNextCell);
         }
-    }, [computerWordPathLength, index])
+    }, [dispatch, hinting, computerWordPathLength, index])
 
     return (
         <div className="board-container bg-black dark:bg-gray-900"> {/* Change Board.css if changing bg-gray-900. */}
@@ -84,10 +92,11 @@ const Board = () => {
                         <Cell
                             key={`${i}_${j}`}
                             id={`${i}_${j}`}
-                            highlight={wordPath.includes(`${i}_${j}`) || computerWordPath.slice(0, index + 1).includes(`${i}_${j}`)}
+                            highlightPrimary={lastSetLetterId === `${i}_${j}`}
+                            highlightSecondary={wordPath.includes(`${i}_${j}`) || computerWordPath.slice(0, index + 1).includes(`${i}_${j}`)}
                             value={l}
-                            editable={status !== 'PENDING' && computerWordPath.length === 0 && !lastSetLetterValue && hasLetterInAdjacentCell(i, j, field)}
-                            selectable={status !== 'PENDING' && computerWordPath.length === 0 && !!lastSetLetterValue && (wordPath.length === 0 || isAdjacentToLastSelectedCell(i, j, wordPath))}
+                            editable={status !== 'PENDING' && computerWordPath.length === 0 && !lastSetLetterId && hasLetterInAdjacentCell(i, j, field)}
+                            selectable={status !== 'PENDING' && computerWordPath.length === 0 && !!lastSetLetterId && (wordPath.length === 0 || isAdjacentToLastSelectedCell(i, j, wordPath))}
                             onSelectWord={(letter: string) => dispatch(updateWord({letter, cell: `${i}_${j}`}))}
                             onResetLetter={onResetLetter}
                             onChange={onPlaceLetter}

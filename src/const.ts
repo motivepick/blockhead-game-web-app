@@ -1,4 +1,6 @@
 export const TEXT_COLOR = 'text-black dark:text-gray-100'
-export const HIGHLIGHTED_BG_COLOR = 'bg-indigo-200 dark:bg-indigo-600'
+export const HIGHLIGHTED_PRIMARY_BG_COLOR = 'bg-pink-200 dark:bg-pink-600'
+export const HIGHLIGHTED_SECONDARY_BG_COLOR = 'bg-indigo-200 dark:bg-indigo-600'
+export const HIGHLIGHTED_MIXED_BG_COLOR = 'bg-red-200 dark:bg-red-600'
 export const ACTIONABLE_BG_COLOR = 'bg-gray-100 dark:bg-gray-500'
 export const NON_ACTIONABLE_BG_COLOR = 'bg-slate-300 dark:bg-slate-600'

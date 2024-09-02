@@ -67,9 +67,11 @@ const gameSlice = createSlice({
         },
         resetHinting(state) {
             placeLetterOnFieldState(state, { letter: '.', cell: state.lastSetLetter.id })
-            state.lastSetLetter = {id: '', value: ''}
             state.word = []
             state.hinting = false
+        },
+        resetLastSetLetter(state) {
+            state.lastSetLetter = {id: '', value: ''}
         },
         userMove(state) {
             const word = state.word.join('')
@@ -123,10 +125,12 @@ const gameSlice = createSlice({
                 if (state.errors.length > 0) return
                 const { letter, cell } = action.payload
 
-                placeLetterOnFieldState(state, { letter, cell: `${cell[0]}_${cell[1]}` })
+                const id = `${cell[0]}_${cell[1]}`
+                placeLetterOnFieldState(state, { letter, cell: id })
                 commitWordState(state, action.payload.word, "computer")
                 state.computerWordPath = action.payload.path.map(([x, y]) => `${x}_${y}`)
                 state.status = 'SUCCEEDED'
+                state.lastSetLetter = { id: id, value: letter.toUpperCase() }
             })
             .addCase(fetchHint.fulfilled, (state, action) => {
                 const { letter, cell } = action.payload
@@ -172,7 +176,7 @@ const placeLetterOnFieldState = (state, { letter, cell }) => {
 
 const checkForErrors = (state, checkError, params) => {
     const error = checkError(...params)
-    if(error.id) {
+    if (error.id) {
         state.errors.push(error)
     }
 }
@@ -192,6 +196,6 @@ const checkLetterPlacedNearText = (cell, field) => {
 const checkWordAlreadyUsed = (word, usedWords) => usedWords.includes(word) ? { id: 'WordAlreadyUsed', message: 'Word is already used' } : emptyError
 const checkUsedNewLetter = (cell, path) => !path.includes(cell) ? { id: 'NoNewLetterUsed', message: 'Use new letter' } : emptyError
 
-export const { setDifficulty, setFieldSize, resetHinting, setComputerWordPath, userMove, updateWord, placeLetter, removeLetter, resetWord } = gameSlice.actions
+export const { setDifficulty, setFieldSize, resetHinting, resetLastSetLetter, setComputerWordPath, userMove, updateWord, placeLetter, removeLetter, resetWord } = gameSlice.actions
 
 export default gameSlice.reducer

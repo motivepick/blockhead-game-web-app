@@ -1,10 +1,17 @@
-import React, {useCallback} from 'react'
+import React, {FC, useCallback} from 'react'
 import './Board.css'
-import {ACTIONABLE_BG_COLOR, HIGHLIGHTED_BG_COLOR, NON_ACTIONABLE_BG_COLOR, TEXT_COLOR} from "../const";
+import {
+    ACTIONABLE_BG_COLOR,
+    HIGHLIGHTED_SECONDARY_BG_COLOR,
+    HIGHLIGHTED_PRIMARY_BG_COLOR,
+    NON_ACTIONABLE_BG_COLOR,
+    TEXT_COLOR, HIGHLIGHTED_MIXED_BG_COLOR
+} from "../const";
 
-type TCell = {
+type Props = {
     id: string,
-    highlight: boolean,
+    highlightPrimary: boolean,
+    highlightSecondary: boolean,
     value: string,
     editable: boolean,
     selectable: boolean,
@@ -13,10 +20,23 @@ type TCell = {
     onResetLetter: (e: React.MouseEvent<HTMLDivElement>) => void
 }
 
-const Cell = ({id, highlight, value, editable, selectable, onSelectWord, onResetLetter, onChange}: TCell) => {
+const backgroundColor = (props: Props) => {
+    const {highlightPrimary, highlightSecondary, selectable} = props
+    if (highlightPrimary && highlightSecondary) {
+        return HIGHLIGHTED_MIXED_BG_COLOR
+    } else if (highlightPrimary) {
+        return HIGHLIGHTED_PRIMARY_BG_COLOR
+    } else if (highlightSecondary) {
+        return HIGHLIGHTED_SECONDARY_BG_COLOR
+    }
+    return selectable ? ACTIONABLE_BG_COLOR : NON_ACTIONABLE_BG_COLOR;
+}
+
+const Cell: FC<Props> = (props) => {
+    const {id, value, editable, selectable, onSelectWord, onResetLetter, onChange} = props
     const selectCell = useCallback(() => {
         selectable && onSelectWord(value)
-    }, [selectable, value])
+    }, [selectable, onSelectWord, value])
 
     if (value === '.') {
         return (
@@ -34,10 +54,9 @@ const Cell = ({id, highlight, value, editable, selectable, onSelectWord, onReset
         )
     }
 
-    const background = selectable ? ACTIONABLE_BG_COLOR : NON_ACTIONABLE_BG_COLOR
     return (
         <div
-            className={`cell ${TEXT_COLOR} ${highlight ? HIGHLIGHTED_BG_COLOR : background} ${selectable ? 'selectable' : ''}`}
+            className={`cell ${TEXT_COLOR} ${backgroundColor(props)} ${selectable ? 'selectable' : ''}`}
             id={id}
             onClick={selectCell}
             onContextMenu={onResetLetter}>

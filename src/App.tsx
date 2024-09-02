@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React, {useEffect} from 'react'
-import {useAppDispatch, useAppSelector} from './store/hooks'
+import {useAppDispatch} from './store/hooks'
 import {
     fetchComputerMove,
     fetchCreateNewField,
@@ -11,7 +11,7 @@ import {
     userMove
 } from './store/reducer'
 import {useSelector} from 'react-redux'
-import {selectAll, selectDifficulty, selectFieldSize} from './store/selectors'
+import {selectDifficulty, selectErrors, selectField, selectFieldSize} from './store/selectors'
 import Board from './board/Board'
 import ScoreBoard from './board/ScoreBoard'
 import Background from './components/Background'
@@ -64,12 +64,13 @@ const App = () => {
     useEffect(() => {
         dispatch(fetchCreateNewField(fieldSize))
     }, [dispatch, fieldSize])
-    const allState = useAppSelector(selectAll)
 
-    if (allState.field[0].length <= 0) return <div>Select field size</div>
+    const field = useSelector(selectField)
+    const errors = useSelector(selectErrors)
+    if (field[0].length <= 0) return <div>Select field size</div>
 
     const onSubmitWord = async () => {
-        if (allState.error) return
+        if (errors.length) return
         dispatch(userMove())
         dispatch(fetchComputerMove())
     }
@@ -84,7 +85,7 @@ const App = () => {
                 <div className="md:col-span-2">
                     <Board/>
                     <br/>
-                    {allState.errors.map((error, i) =>
+                    {errors.map((error, i) =>
                         <p
                             key={`error${i}`}
                             className="h-10 px-6 font-semibold rounded-md text-red-900 dark:text-red-400"

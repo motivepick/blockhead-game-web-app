@@ -1,14 +1,17 @@
 import React from 'react'
-import {useAppSelector} from '../store/hooks'
-import {selectAll} from "../store/selectors"
-import {TEXT_COLOR} from "../const";
+import {TEXT_COLOR} from "../const"
+import {selectScoreByComputer, selectScoreByUser, selectWordsByComputer, selectWordsByUser} from "../store/selectors"
+import {useSelector} from "react-redux"
 
 const zip: (a: Words, b: Words) => Words[] = (a, b) => Array
     .from(Array(Math.max(a.length, b.length)).keys())
     .map(i => [i < a.length ? a[i] : '', i < b.length ? b[i] : ''])
 
 const ScoreBoard = () => {
-    const {wordsByUser, scoreByUser, wordsByComputer, scoreByComputer} = useAppSelector(selectAll)
+    const wordsByUser = useSelector(selectWordsByUser)
+    const scoreByUser = useSelector(selectScoreByUser)
+    const wordsByComputer = useSelector(selectWordsByComputer)
+    const scoreByComputer = useSelector(selectScoreByComputer)
 
     return (
         <table className="min-w-full">

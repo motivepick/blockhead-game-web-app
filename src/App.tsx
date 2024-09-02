@@ -15,7 +15,6 @@ import {selectAll, selectDifficulty, selectFieldSize} from './store/selectors'
 import Board from './board/Board'
 import ScoreBoard from './board/ScoreBoard'
 import Background from './components/Background'
-import {TEXT_COLOR} from './const'
 
 const SelectDifficultyDropdown = () => {
     const dispatch = useAppDispatch()

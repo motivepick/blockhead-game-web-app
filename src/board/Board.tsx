@@ -21,6 +21,9 @@ import {
     selectWordPath
 } from "../store/selectors"
 
+const COMPUTER_MOVE_HIGHLIGHT_DELAY_MS = 300
+const COMPUTER_MOVE_HINT_HIGHLIGHT_DELAY_MS = 400
+
 const adjacentCells = (i: number, j: number) => [
     [i - 1, j],
     [i + 1, j],
@@ -41,6 +44,46 @@ const isAdjacentToLastSelectedCell = (i: number, j: number, wordPath: string[]):
     }
 };
 
+const latinToCyrillicMap: Record<string, string> = {
+    'Q': 'Й',
+    'W': 'Ц',
+    'E': 'У',
+    'R': 'К',
+    'T': 'Е',
+    'Y': 'Н',
+    'U': 'Г',
+    'I': 'Ш',
+    'O': 'Щ',
+    'P': 'З',
+    '[': 'Х',
+    ']': 'Ъ',
+    'A': 'Ф',
+    'S': 'Ы',
+    'D': 'В',
+    'F': 'А',
+    'G': 'П',
+    'H': 'Р',
+    'J': 'О',
+    'K': 'Л',
+    'L': 'Д',
+    ';': 'Ж',
+    '\'': 'Э',
+    'Z': 'Я',
+    'X': 'Ч',
+    'C': 'С',
+    'V': 'М',
+    'B': 'И',
+    'N': 'Т',
+    'M': 'Ь',
+    ',': 'Б',
+    '.': 'Ю'
+}
+
+const mapToAlphabet = (letter: string): string => {
+    const upperCaseLetter = letter.toUpperCase();
+    return latinToCyrillicMap[upperCaseLetter as keyof Record<string, string>] || upperCaseLetter;
+}
+
 const Board = () => {
     const field = useAppSelector(selectField)
     const fieldSize = useAppSelector(selectFieldSize)
@@ -53,7 +96,7 @@ const Board = () => {
     const dispatch = useAppDispatch()
 
     const onPlaceLetter = (event: ChangeEvent<HTMLInputElement>) => dispatch(placeLetter({
-        letter: event.target.value,
+        letter: mapToAlphabet(event.target.value),
         cell: event.target.id
     }))
 
@@ -76,7 +119,7 @@ const Board = () => {
         } else {
             const highlightNextCell = setTimeout(() => {
                 setIndex(index => index + 1)
-            }, 300);
+            }, hinting ? COMPUTER_MOVE_HINT_HIGHLIGHT_DELAY_MS : COMPUTER_MOVE_HIGHLIGHT_DELAY_MS);
             return () => clearTimeout(highlightNextCell);
         }
     }, [dispatch, hinting, computerWordPathLength, index])

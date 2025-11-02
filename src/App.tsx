@@ -71,6 +71,7 @@ const Dropdown = ({defaultValue, data, onSelect}) => {
 const App = () => {
     const dispatch = useAppDispatch()
     const fieldSize = useSelector(selectFieldSize)
+
     useEffect(() => {
         dispatch(fetchCreateNewField(fieldSize))
     }, [dispatch, fieldSize])
@@ -88,6 +89,18 @@ const App = () => {
             dispatch(removeLetter({cell: lastSetLetterId}))
         }
     }, [wordPath, dispatch, resetWord])
+
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Backspace' || event.key === 'Escape') {
+                if (!hinting && (wordPath.length || lastSetLetterId)) {
+                    onResetWord()
+                }
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [hinting, wordPath, lastSetLetterId, onResetWord]);
 
     const canReset = !hinting && (wordPath.length || lastSetLetterId)
 

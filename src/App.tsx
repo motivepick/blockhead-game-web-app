@@ -106,8 +106,8 @@ const App = () => {
 
     if (field[0].length <= 0) return <div>Select field size</div>
 
-    const onSubmitWord = async () => {
-        if (errors.length) return
+    const handleSubmitWord = async () => {
+        if (wordPath.length == 0 || errors.length > 0) return
         dispatch(userMove())
         dispatch(fetchComputerMove())
     }
@@ -118,7 +118,7 @@ const App = () => {
         <Background>
             <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-4 p-2">
                 <div className="md:col-span-2">
-                    <Board/>
+                    <Board onSubmitWord={handleSubmitWord}/>
                     <br/>
                     {errors.map((error, i) =>
                         <p
@@ -132,7 +132,7 @@ const App = () => {
                     <button
                         className={hinting ? DISABLED_BUTTON : ACTIVE_PRIMARY_BUTTON}
                         type="button"
-                        onClick={onSubmitWord}
+                        onClick={handleSubmitWord}
                         disabled={hinting}
                     >
                         Submit chosen word

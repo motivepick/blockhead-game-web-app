@@ -1,4 +1,4 @@
-import React, {ChangeEvent, MouseEvent, useEffect, useState} from 'react'
+import React, {ChangeEvent, FC, MouseEvent, useEffect, useState} from 'react'
 import './Board.css'
 import {useAppDispatch, useAppSelector} from '../store/hooks'
 import {
@@ -20,6 +20,10 @@ import {
     selectStatus,
     selectWordPath
 } from "../store/selectors"
+
+type Props = {
+    onSubmitWord: () => void
+}
 
 const COMPUTER_MOVE_HIGHLIGHT_DELAY_MS = 300
 const COMPUTER_MOVE_HINT_HIGHLIGHT_DELAY_MS = 400
@@ -84,7 +88,8 @@ const mapToAlphabet = (letter: string): string => {
     return latinToCyrillicMap[upperCaseLetter as keyof Record<string, string>] || upperCaseLetter;
 }
 
-const Board = () => {
+const Board: FC<Props> = (props) => {
+    const { onSubmitWord } = props
     const field = useAppSelector(selectField)
     const fieldSize = useAppSelector(selectFieldSize)
     const wordPath = useAppSelector(selectWordPath)
@@ -141,6 +146,7 @@ const Board = () => {
                             editable={status !== 'PENDING' && computerWordPath.length === 0 && !lastSetLetterId && hasLetterInAdjacentCell(i, j, field)}
                             selectable={status !== 'PENDING' && computerWordPath.length === 0 && !!lastSetLetterId && (wordPath.length === 0 || isAdjacentToLastSelectedCell(i, j, wordPath))}
                             onSelectWord={(letter: string) => dispatch(updateWord({letter, cell: `${i}_${j}`}))}
+                            onSubmitWord={onSubmitWord}
                             onResetLetter={onResetLetter}
                             onChange={onPlaceLetter}
                         />))

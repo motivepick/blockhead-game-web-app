@@ -3,8 +3,6 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import { makeMove, createNewField } from '../api/service'
 import {selectDifficulty, selectField, selectFieldSize, selectLastSetLetterId, selectWordsUsed} from "./selectors";
 
-const cyrillicAlphabet = /^\p{Script=Cyrillic}+$/u
-
 const initialState = {
     fieldSize: 5,
     difficulty: 'Medium',
@@ -57,9 +55,14 @@ const gameSlice = createSlice({
             state.computerWordPath = payload
         },
         updateWord(state, action) {
-            const { letter, cell } = action.payload
+            const {letter, cell} = action.payload
             state.word.push(letter)
             state.wordPath.push(cell)
+
+            const word = state.word.join('')
+            state.errors =
+                [checkUsedNewLetter(selectLastSetLetterId(state), state.wordPath), checkWordAlreadyUsed(word, state.wordsUsed)]
+                    .filter(it => it.id !== '')
         },
         resetWord(state){
             resetWordState(state)
@@ -76,9 +79,6 @@ const gameSlice = createSlice({
         userMove(state) {
             const word = state.word.join('')
 
-            checkForErrors(state, checkWordAlreadyUsed, [word, state.wordsUsed])
-            checkForErrors(state, checkUsedNewLetter, [selectLastSetLetterId(state), state.wordPath])
-
             if (state.errors.length > 0) return
 
             commitWordState(state, word, "user")
@@ -91,8 +91,6 @@ const gameSlice = createSlice({
             state.errors = []
             const { letter, cell } = action.payload
 
-            checkForErrors(state, checkAlphabet, letter)
-
             placeLetterOnFieldState(state, action.payload)
 
             if (state.lastSetLetter.id !== '') {
@@ -102,8 +100,6 @@ const gameSlice = createSlice({
             resetWordState(state)
             state.lastSetLetter = { id: cell, value: letter.toUpperCase() }
             state.wordPath = []
-
-            checkForErrors(state, checkLetterPlacedNearText, [cell, state.field])
         },
         removeLetter(state, action) {
             const { cell } = action.payload
@@ -154,7 +150,7 @@ const gameSlice = createSlice({
                 state.field = field
                 state.wordsUsed.push(word)
             })
-    },
+    }
 })
 
 const commitWordState = (state, word, player) => {
@@ -174,25 +170,8 @@ const placeLetterOnFieldState = (state, { letter, cell }) => {
     state.field[x][y] = letter.toUpperCase()
 }
 
-const checkForErrors = (state, checkError, params) => {
-    const error = checkError(...params)
-    if (error.id) {
-        state.errors.push(error)
-    }
-}
-
 const emptyError = { id: '', message: '' }
 
-const checkAlphabet = letter => !letter.match(cyrillicAlphabet) ? { id: 'WrongAlphabet', message: 'Letter should be from the alphabet' } : emptyError
-const checkLetterPlacedNearText = (cell, field) => {
-    const [x, y] = cell.split('_').map(i => Number(i))
-    const directions = [[x - 1, y], [x + 1, y], [x, y - 1], [x, y + 1]]
-    const hasLetterInAdjacentCell = directions
-        .map(([xi, yi]) => field[xi]?.[yi])
-        .some(letter => letter !== '.' && letter !== undefined)
-
-    return !hasLetterInAdjacentCell ? { id: 'LetterFarFromAnyText', message: 'Place the letter near another letter' } : emptyError
-}
 const checkWordAlreadyUsed = (word, usedWords) => usedWords.includes(word) ? { id: 'WordAlreadyUsed', message: 'Word is already used' } : emptyError
 const checkUsedNewLetter = (cell, path) => !path.includes(cell) ? { id: 'NoNewLetterUsed', message: 'Use new letter' } : emptyError
 

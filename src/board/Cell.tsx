@@ -17,6 +17,7 @@ type Props = {
     selectable: boolean,
     onChange: (event: React.ChangeEvent<HTMLInputElement>) => void
     onSelectWord: (letter: string) => void
+    onSubmitWord: () => void
     onResetLetter: (e: React.MouseEvent<HTMLDivElement>) => void
 }
 
@@ -33,9 +34,16 @@ const backgroundColor = (props: Props) => {
 }
 
 const Cell: FC<Props> = (props) => {
-    const {id, value, editable, selectable, onSelectWord, onResetLetter, onChange} = props
+    const {id, value, editable, selectable, onSelectWord, onSubmitWord, onResetLetter, onChange} = props
     const selectCell = useCallback(() => {
         selectable && onSelectWord(value)
+    }, [selectable, onSelectWord, value])
+
+    const selectCellAndSubmitWord = useCallback(() => {
+        if (selectable) {
+            onSelectWord(value)
+        }
+        onSubmitWord()
     }, [selectable, onSelectWord, value])
 
     if (value === '.') {
@@ -59,7 +67,10 @@ const Cell: FC<Props> = (props) => {
             className={`cell ${TEXT_COLOR} ${backgroundColor(props)} ${selectable ? 'selectable' : ''}`}
             id={id}
             onClick={selectCell}
-            onContextMenu={onResetLetter}>
+            onDoubleClick={selectCellAndSubmitWord}
+            onContextMenu={onResetLetter}
+            style={{userSelect: 'none'}}
+        >
             {value}
         </div>
     )

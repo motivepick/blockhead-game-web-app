@@ -5,7 +5,7 @@ import {selectDifficulty, selectField, selectFieldSize, selectLastSetLetterId, s
 
 const initialState = {
     fieldSize: 5,
-    difficulty: 'Medium',
+    difficulty: 'MEDIUM',
     field: [[]],
     lastSetLetter: { id: '', value: '' },
     word: [],
@@ -33,7 +33,7 @@ export const fetchHint = createAsyncThunk(
     'moves/user',
     async (word, { getState }) => {
         const state = getState()
-        return makeMove({ field: selectField(state), wordsUsed: selectWordsUsed(state), difficulty: 'Hard' })
+        return makeMove({ field: selectField(state), wordsUsed: selectWordsUsed(state), difficulty: 'HARD' })
     }
 )
 
@@ -172,8 +172,11 @@ const placeLetterOnFieldState = (state, { letter, cell }) => {
 
 const emptyError = { id: '', message: '' }
 
-const checkWordAlreadyUsed = (word, usedWords) => usedWords.includes(word) ? { id: 'WordAlreadyUsed', message: 'Word is already used' } : emptyError
-const checkUsedNewLetter = (cell, path) => !path.includes(cell) ? { id: 'NoNewLetterUsed', message: 'Use new letter' } : emptyError
+const checkWordAlreadyUsed = (word, usedWords) =>
+    usedWords.includes(word) ? {id: 'WordAlreadyUsed', messageKey: 'errorWordIsAlreadyUsed'} : emptyError
+
+const checkUsedNewLetter = (cell, path) =>
+    path.includes(cell) ? emptyError : {id: 'NoNewLetterUsed', messageKey: 'errorNewLetterUnused'}
 
 export const { setDifficulty, setFieldSize, resetHinting, resetLastSetLetter, setComputerWordPath, userMove, updateWord, placeLetter, removeLetter, resetWord } = gameSlice.actions
 

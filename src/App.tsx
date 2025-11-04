@@ -24,12 +24,18 @@ import {
 import Board from './board/Board'
 import ScoreBoard from './board/ScoreBoard'
 import Background from './components/Background'
-import {ACTIVE_PRIMARY_BUTTON, ACTIVE_SECONDARY_BUTTON, DISABLED_BUTTON} from "./const";
+import {ACTIVE_PRIMARY_BUTTON, ACTIVE_SECONDARY_BUTTON, DISABLED_BUTTON} from "./const"
+import {useTranslation} from 'react-i18next'
 
 const SelectDifficultyDropdown = () => {
+    const {t} = useTranslation()
     const dispatch = useAppDispatch()
     const difficulty = useSelector(selectDifficulty)
-    const data = ['Easy', 'Medium', 'Hard']
+    const data = [
+        {code: 'EASY', label: t('difficultyEasy')},
+        {code: 'MEDIUM', label: t('difficultyMedium')},
+        {code: 'HARD', label: t('difficultyHard')}
+    ]
     const onSelect = ({target}) => {
         const difficulty = target.value
         dispatch(setDifficulty({difficulty}))
@@ -40,7 +46,11 @@ const SelectDifficultyDropdown = () => {
 const SelectFieldSizeDropdown = () => {
     const dispatch = useAppDispatch()
     const fieldSize = useSelector(selectFieldSize)
-    const data = [3, 5, 7]
+    const data = [
+        {code: 3, label: '3 x 3'},
+        {code: 5, label: '5 x 5'},
+        {code: 7, label: '7 x 7'}
+    ]
     const onSelect = ({target}) => {
         const fieldSize = Number(target.value)
         dispatch(setFieldSize({fieldSize}))
@@ -50,8 +60,8 @@ const SelectFieldSizeDropdown = () => {
 
 const Dropdown = ({defaultValue, data, onSelect}) => {
     const options = data.map((item, index) => (
-        <option key={index} value={item}>
-            {item}
+        <option key={index} value={item.code}>
+            {item.label}
         </option>
     ))
 
@@ -69,6 +79,7 @@ const Dropdown = ({defaultValue, data, onSelect}) => {
 }
 
 const App = () => {
+    const {t} = useTranslation()
     const dispatch = useAppDispatch()
     const fieldSize = useSelector(selectFieldSize)
 
@@ -125,17 +136,17 @@ const App = () => {
                             key={`error${i}`}
                             className="h-10 px-6 font-semibold rounded-md text-red-900 dark:text-red-400"
                         >
-                            Error: {error.message}
+                            {t(error.messageKey)}
                         </p>
                     )}
                     <br/>
                     <button
-                        className={hinting ? DISABLED_BUTTON : ACTIVE_PRIMARY_BUTTON}
+                        className={hinting || wordPath.length == 0 || errors.length > 0 ? DISABLED_BUTTON : ACTIVE_PRIMARY_BUTTON}
                         type="button"
                         onClick={handleSubmitWord}
                         disabled={hinting}
                     >
-                        Submit chosen word
+                        {t('submitWord')}
                     </button>
                     <button
                         className={canReset ? ACTIVE_SECONDARY_BUTTON : DISABLED_BUTTON}
@@ -143,7 +154,7 @@ const App = () => {
                         onClick={onResetWord}
                         disabled={!canReset}
                     >
-                        {wordPath.length ? 'Reset chosen word' : 'Reset letter'}
+                        {t(wordPath.length ? 'resetChosenWord' : 'resetLetter')}
                     </button>
                     <button
                         className={hinting ? DISABLED_BUTTON : ACTIVE_SECONDARY_BUTTON}
@@ -151,7 +162,7 @@ const App = () => {
                         onClick={onHint}
                         disabled={hinting}
                     >
-                        Hint
+                        {t('hint')}
                     </button>
                 </div>
                 <div className="md:col-span-1">

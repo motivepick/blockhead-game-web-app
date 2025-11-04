@@ -1,11 +1,16 @@
 import api from './api'
 
 export const makeMove = async ({ field, wordsUsed, difficulty }: { field: Field, wordsUsed: Words, difficulty: string }) => {
+    const difficultyMap: { [key: string]: string } = {
+        'EASY': 'Easy',
+        'MEDIUM': 'Medium',
+        'HARD': 'Hard'
+    }
     try {
         const response = await api.post('/move-requests', {
             field: field.map(row => row.join('')),
             usedWords: wordsUsed,
-            difficulty
+            difficulty: difficultyMap[difficulty] || 'Medium'
         })
         return response.data
     } catch (error) {

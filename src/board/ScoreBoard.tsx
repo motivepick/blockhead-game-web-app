@@ -2,12 +2,14 @@ import React from 'react'
 import {TEXT_COLOR} from "../const"
 import {selectScoreByComputer, selectScoreByUser, selectWordsByComputer, selectWordsByUser} from "../store/selectors"
 import {useSelector} from "react-redux"
+import {useTranslation} from "react-i18next";
 
 const zip: (a: Words, b: Words) => Words[] = (a, b) => Array
     .from(Array(Math.max(a.length, b.length)).keys())
     .map(i => [i < a.length ? a[i] : '', i < b.length ? b[i] : ''])
 
 const ScoreBoard = () => {
+    const { t } = useTranslation()
     const wordsByUser = useSelector(selectWordsByUser)
     const scoreByUser = useSelector(selectScoreByUser)
     const wordsByComputer = useSelector(selectWordsByComputer)
@@ -15,15 +17,15 @@ const ScoreBoard = () => {
 
     return (
         <table className="min-w-full">
-            <caption className={TEXT_COLOR}>Scoreboard</caption>
+            <caption className={TEXT_COLOR}>{t('scoreboardTitle')}</caption>
             <thead
                 className="border-b  bg-indigo-100 border-indigo-200 dark:bg-slate-700 dark:border-slate-600">
             <tr>
                 <th scope="col" className="text-sm font-bold text-gray-900 dark:text-gray-400 px-6 py-4">
-                    User
+                    {t('scoreboardUser')}
                 </th>
                 <th scope="col" className="text-sm font-bold text-gray-900 dark:text-gray-400 px-6 py-4">
-                    Computer
+                    {t('scoreboardComputer')}
                 </th>
             </tr>
             </thead>
@@ -40,9 +42,9 @@ const ScoreBoard = () => {
             <tfoot>
             <tr>
                 <td className="text-sm text-gray-900 dark:text-gray-200 px-6 py-4 whitespace-nowrap">
-                    <b>Score:</b> {scoreByUser}</td>
+                    <b>{t('scoreboardScore')}</b> {scoreByUser}</td>
                 <td className="text-sm text-gray-900 dark:text-gray-200 px-6 py-4 whitespace-nowrap">
-                    <b>Score:</b> {scoreByComputer}</td>
+                    <b>{t('scoreboardScore')}</b> {scoreByComputer}</td>
             </tr>
             </tfoot>
         </table>

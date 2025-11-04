@@ -64,12 +64,11 @@ const Cell: FC<Props> = (props) => {
 
     return (
         <div
-            className={`cell ${TEXT_COLOR} ${backgroundColor(props)} ${selectable ? 'selectable' : ''}`}
+            className={`cell user-select-none ${TEXT_COLOR} ${backgroundColor(props)} ${selectable ? 'selectable' : ''}`}
             id={id}
             onClick={selectCell}
             onDoubleClick={selectCellAndSubmitWord}
             onContextMenu={onResetLetter}
-            style={{userSelect: 'none'}}
         >
             {value}
         </div>

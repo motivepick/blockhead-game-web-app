@@ -44,7 +44,7 @@ const Cell: FC<Props> = (props) => {
             onSelectWord(value)
         }
         onSubmitWord()
-    }, [selectable, onSelectWord, value])
+    }, [selectable, onSelectWord, value, onSubmitWord])
 
     if (value === '.') {
         return (

@@ -99,7 +99,7 @@ const App = () => {
         } else if (lastSetLetterId) {
             dispatch(removeLetter({cell: lastSetLetterId}))
         }
-    }, [wordPath, dispatch, resetWord, lastSetLetterId])
+    }, [wordPath, dispatch, lastSetLetterId])
 
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
@@ -118,7 +118,7 @@ const App = () => {
     if (field[0].length <= 0) return <div>Select field size</div>
 
     const handleSubmitWord = async () => {
-        if (wordPath.length == 0 || errors.length > 0) return
+        if (wordPath.length === 0 || errors.length > 0) return
         dispatch(userMove())
         dispatch(fetchComputerMove())
     }
@@ -141,7 +141,7 @@ const App = () => {
                     )}
                     <br/>
                     <button
-                        className={hinting || wordPath.length == 0 || errors.length > 0 ? DISABLED_BUTTON : ACTIVE_PRIMARY_BUTTON}
+                        className={hinting || wordPath.length === 0 || errors.length > 0 ? DISABLED_BUTTON : ACTIVE_PRIMARY_BUTTON}
                         type="button"
                         onClick={handleSubmitWord}
                         disabled={hinting}

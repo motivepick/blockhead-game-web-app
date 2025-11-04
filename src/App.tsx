@@ -99,7 +99,7 @@ const App = () => {
         } else if (lastSetLetterId) {
             dispatch(removeLetter({cell: lastSetLetterId}))
         }
-    }, [wordPath, dispatch, resetWord])
+    }, [wordPath, dispatch, resetWord, lastSetLetterId])
 
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {

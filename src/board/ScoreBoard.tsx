@@ -1,6 +1,6 @@
 import React from 'react'
 import {TEXT_COLOR} from "../const"
-import {selectScoreByComputer, selectScoreByUser, selectWordsByComputer, selectWordsByUser} from "../store/selectors"
+import {selectWordsByComputer, selectWordsByUser} from "../store/selectors"
 import {useSelector} from "react-redux"
 import {useTranslation} from "react-i18next";
 
@@ -8,12 +8,14 @@ const zip: (a: Words, b: Words) => Words[] = (a, b) => Array
     .from(Array(Math.max(a.length, b.length)).keys())
     .map(i => [i < a.length ? a[i] : '', i < b.length ? b[i] : ''])
 
+const score = (words: string[]) => words
+    .map(it => it.length)
+    .reduce((a, b) => a + b, 0)
+
 const ScoreBoard = () => {
     const { t } = useTranslation()
     const wordsByUser = useSelector(selectWordsByUser)
-    const scoreByUser = useSelector(selectScoreByUser)
     const wordsByComputer = useSelector(selectWordsByComputer)
-    const scoreByComputer = useSelector(selectScoreByComputer)
 
     return (
         <table className="min-w-full">
@@ -42,9 +44,9 @@ const ScoreBoard = () => {
             <tfoot>
             <tr>
                 <td className="text-sm text-gray-900 dark:text-gray-200 px-6 py-4 whitespace-nowrap">
-                    <b>{t('scoreboardScore')}</b> {scoreByUser}</td>
+                    <b>{t('scoreboardScore')}</b> {score(wordsByUser)}</td>
                 <td className="text-sm text-gray-900 dark:text-gray-200 px-6 py-4 whitespace-nowrap">
-                    <b>{t('scoreboardScore')}</b> {scoreByComputer}</td>
+                    <b>{t('scoreboardScore')}</b> {score(wordsByComputer)}</td>
             </tr>
             </tfoot>
         </table>

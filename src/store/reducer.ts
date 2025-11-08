@@ -1,7 +1,7 @@
 // @ts-nocheck
 import {createAsyncThunk, createSlice} from '@reduxjs/toolkit'
 import {createNewField, makeMove} from '../api/service'
-import {selectDifficulty, selectField, selectFieldSize, selectLastSetLetterId, selectWordsUsed} from "./selectors";
+import {selectDifficulty, selectField, selectFieldSize, selectLastSetLetterId, selectUsedWords} from "./selectors";
 
 const readFieldSize = () => {
     try {
@@ -31,14 +31,10 @@ const initialState = {
     difficulty: readDifficulty(),
     field: [[]],
     lastSetLetter: { id: '', value: '' },
-    word: [],
     wordPath: [],
     computerWordPath: [],
-    wordsUsed: [],
     wordsByUser: [],
     wordsByComputer: [],
-    scoreByUser: 0,
-    scoreByComputer: 0,
     errors: [],
     status: 'IDLE',
     hinting: false
@@ -73,7 +69,7 @@ export const fetchComputerMove = createAsyncThunk(
     'moves/computer',
     async (word, { getState }) => {
         const state = getState()
-        return makeMove({ field: selectField(state), wordsUsed: selectWordsUsed(state), difficulty: selectDifficulty(state) })
+        return makeMove({ field: selectField(state), usedWords: selectUsedWords(state) , difficulty: selectDifficulty(state) })
     }
 )
 
@@ -81,7 +77,7 @@ export const fetchHint = createAsyncThunk(
     'moves/hint',
     async (word, { getState }) => {
         const state = getState()
-        return makeMove({ field: selectField(state), wordsUsed: selectWordsUsed(state), difficulty: 'HARD' })
+        return makeMove({ field: selectField(state), usedWords: selectUsedWords(state), difficulty: 'HARD' })
     }
 )
 
@@ -101,7 +97,7 @@ const gameSlice = createSlice({
 
             const word = state.word.join('')
             state.errors =
-                [checkUsedNewLetter(selectLastSetLetterId(state), state.wordPath), checkWordAlreadyUsed(word, state.wordsUsed)]
+                [checkUsedNewLetter(selectLastSetLetterId(state), state.wordPath), checkWordAlreadyUsed(word, selectUsedWords(state))]
                     .filter(it => it.id !== '')
         },
         resetWord(state){
@@ -189,22 +185,15 @@ const gameSlice = createSlice({
                 state.field = Array.from({ length: fieldSize }, () => Array.from({ length: fieldSize }, () => '.'))
             })
             .addCase(fetchCreateNewField.fulfilled, (state, action) => {
-                const field = action.payload
-                const word = field[Math.floor(field.length / 2)].join('')
-
-                state.field = field
-                state.wordsUsed.push(word)
+                state.field = action.payload
             })
     }
 })
 
 const commitWordState = (state, word, player) => {
     const playerWords = player === "computer" ? "wordsByComputer" : "wordsByUser"
-    const playerScore = player === "computer" ? "scoreByComputer" : "scoreByUser"
 
-    state.wordsUsed.push(word)
     state[playerWords].push(word)
-    state[playerScore] += word.length
 }
 
 const resetWordState = (state) => state.word = []

@@ -21,6 +21,15 @@ const initialState = {
     hinting: false
 }
 
+export const submitUserMove = createAsyncThunk(
+    'moves/user',
+    // Note: if an error happens here, it's only visible in the submitUserMove.rejected case in the extra reducers, in action.error.message
+    async (_, {getState}) => {
+        const state = getState()
+        return state.word.join('')
+    }
+)
+
 export const fetchComputerMove = createAsyncThunk(
     'moves/computer',
     async (word, { getState }) => {
@@ -30,7 +39,7 @@ export const fetchComputerMove = createAsyncThunk(
 )
 
 export const fetchHint = createAsyncThunk(
-    'moves/user',
+    'moves/hint',
     async (word, { getState }) => {
         const state = getState()
         return makeMove({ field: selectField(state), wordsUsed: selectWordsUsed(state), difficulty: 'HARD' })
@@ -76,17 +85,6 @@ const gameSlice = createSlice({
         resetLastSetLetter(state) {
             state.lastSetLetter = {id: '', value: ''}
         },
-        userMove(state) {
-            const word = state.word.join('')
-
-            if (state.errors.length > 0) return
-
-            commitWordState(state, word, "user")
-
-            resetWordState(state)
-            resetLetterState(state)
-            state.wordPath = []
-        },
         placeLetter(state, action) {
             state.errors = []
             const { letter, cell } = action.payload
@@ -114,6 +112,16 @@ const gameSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
+            .addCase(submitUserMove.fulfilled, (state, action) => {
+                const word = action.payload
+                if (state.errors.length > 0) return
+
+                commitWordState(state, word, "user")
+
+                resetWordState(state)
+                resetLetterState(state)
+                state.wordPath = []
+            })
             .addCase(fetchComputerMove.pending, (state) => {
                 state.status = 'PENDING'
             })
@@ -178,6 +186,6 @@ const checkWordAlreadyUsed = (word, usedWords) =>
 const checkUsedNewLetter = (cell, path) =>
     path.includes(cell) ? emptyError : {id: 'NoNewLetterUsed', messageKey: 'errorNewLetterUnused'}
 
-export const { setDifficulty, setFieldSize, resetHinting, resetLastSetLetter, setComputerWordPath, userMove, updateWord, placeLetter, removeLetter, resetWord } = gameSlice.actions
+export const { setDifficulty, setFieldSize, resetHinting, resetLastSetLetter, setComputerWordPath, updateWord, placeLetter, removeLetter, resetWord } = gameSlice.actions
 
 export default gameSlice.reducer

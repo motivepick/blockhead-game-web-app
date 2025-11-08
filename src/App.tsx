@@ -2,6 +2,7 @@
 import React, {useCallback, useEffect} from 'react'
 import {useAppDispatch} from './store/hooks'
 import {
+    submitUserMove,
     fetchComputerMove,
     fetchCreateNewField,
     fetchHint,
@@ -9,7 +10,6 @@ import {
     resetWord,
     setDifficulty,
     setFieldSize,
-    userMove
 } from './store/reducer'
 import {useSelector} from 'react-redux'
 import {
@@ -119,7 +119,7 @@ const App = () => {
 
     const handleSubmitWord = async () => {
         if (wordPath.length === 0 || errors.length > 0) return
-        dispatch(userMove())
+        dispatch(submitUserMove())
         dispatch(fetchComputerMove())
     }
 

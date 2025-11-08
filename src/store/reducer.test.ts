@@ -1,6 +1,6 @@
 // @ts-nocheck
 import reducer, {
-    userMove
+    submitUserMove
 } from './reducer'
 
 describe('reducer', () => {
@@ -27,15 +27,15 @@ describe('reducer', () => {
             wordsByComputer: []
         })
     })
-    describe('userMove', () => {
-        it('should handle userMove', () => {
-            const actual = reducer(initialState, userMove({ word: 'ABC' }))
+    describe('submitUserMove', () => {
+        it('should handle submitUserMove', () => {
+            const actual = reducer(initialState, submitUserMove({ word: 'ABC' }))
             expect(actual.wordsUsed.length).toEqual(initialState.wordsUsed.length + 1)
             expect(actual.wordsByUser.at(-1)).toEqual('ABC')
             expect(actual.wordsUsed.at(-1)).toEqual('ABC')
         })
         it('should not accept already used word', () => {
-            const actual = reducer(initialState, userMove({ word: 'word3' }))
+            const actual = reducer(initialState, submitUserMove({ word: 'word3' }))
             expect(actual.wordsUsed.length).toEqual(initialState.wordsUsed.length)
             expect(actual.wordsByUser.length).toEqual(initialState.wordsByUser.length)
             expect(actual.error).toEqual('Word already used')

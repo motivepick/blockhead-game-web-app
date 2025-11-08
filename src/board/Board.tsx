@@ -1,4 +1,4 @@
-import React, {ChangeEvent, FC, MouseEvent, useEffect, useState} from 'react'
+import React, {FC, MouseEvent, useEffect, useState} from 'react'
 import './Board.css'
 import {useAppDispatch, useAppSelector} from '../store/hooks'
 import {
@@ -20,6 +20,7 @@ import {
     selectStatus,
     selectWordPath
 } from "../store/selectors"
+import {equals, includes} from "../common"
 
 type Props = {
     onSubmitWord: () => void
@@ -28,7 +29,7 @@ type Props = {
 const COMPUTER_MOVE_HIGHLIGHT_DELAY_MS = 300
 const COMPUTER_MOVE_HINT_HIGHLIGHT_DELAY_MS = 400
 
-const adjacentCells = (i: number, j: number) => [
+const adjacentCells = (i: number, j: number): Cell[] => [
     [i - 1, j],
     [i + 1, j],
     [i, j - 1],
@@ -38,11 +39,10 @@ const adjacentCells = (i: number, j: number) => [
 const hasLetterInAdjacentCell = (i: number, j: number, field: string[][]): boolean =>
     adjacentCells(i, j).some(([x, y]) => field[x]?.[y] && field[x][y] !== '.')
 
-const isAdjacentToLastSelectedCell = (i: number, j: number, wordPath: string[]): boolean => {
+const isAdjacentToLastSelectedCell = (i: number, j: number, wordPath: Cell[]): boolean => {
     if (wordPath.length) {
-        const lastSelectedCellId = wordPath[wordPath.length - 1]
-        const [x, y] = lastSelectedCellId.split('_').map(Number)
-        return adjacentCells(i, j).some(([adjX, adjY]) => adjX === x && adjY === y);
+        const lastSelectedCell = wordPath[wordPath.length - 1]
+        return includes(adjacentCells(i, j), lastSelectedCell)
     } else {
         return false
     }
@@ -100,9 +100,9 @@ const Board: FC<Props> = (props) => {
     const hinting = useAppSelector(selectHinting)
     const dispatch = useAppDispatch()
 
-    const onPlaceLetter = (event: ChangeEvent<HTMLInputElement>) => dispatch(placeLetter({
-        letter: mapToAlphabet(event.target.value),
-        cell: event.target.id
+    const onPlaceLetter = (cell: Cell, letter: string) => dispatch(placeLetter({
+        letter: mapToAlphabet(letter),
+        cell
     }))
 
     const [index, setIndex] = useState(0)
@@ -140,12 +140,12 @@ const Board: FC<Props> = (props) => {
                         <Cell
                             key={`${i}_${j}`}
                             id={`${i}_${j}`}
-                            highlightPrimary={lastSetLetterId === `${i}_${j}`}
-                            highlightSecondary={wordPath.includes(`${i}_${j}`) || computerWordPath.slice(0, index + 1).includes(`${i}_${j}`)}
+                            highlightPrimary={equals(lastSetLetterId, [i, j])}
+                            highlightSecondary={includes(wordPath, [i, j]) || includes(computerWordPath.slice(0, index + 1), [i, j])}
                             value={l}
-                            editable={status !== 'PENDING' && computerWordPath.length === 0 && !lastSetLetterId && hasLetterInAdjacentCell(i, j, field)}
-                            selectable={status !== 'PENDING' && computerWordPath.length === 0 && !!lastSetLetterId && (wordPath.length === 0 || isAdjacentToLastSelectedCell(i, j, wordPath))}
-                            onSelectWord={(letter: string) => dispatch(updateWord({letter, cell: `${i}_${j}`}))}
+                            editable={status !== 'PENDING' && computerWordPath.length === 0 && equals(lastSetLetterId, [-1, -1]) && hasLetterInAdjacentCell(i, j, field)}
+                            selectable={status !== 'PENDING' && computerWordPath.length === 0 && !equals(lastSetLetterId, [-1, -1]) && (wordPath.length === 0 || isAdjacentToLastSelectedCell(i, j, wordPath))}
+                            onSelectWord={(letter: string) => dispatch(updateWord({letter, cell: [i, j]}))}
                             onSubmitWord={onSubmitWord}
                             onResetLetter={onResetLetter}
                             onChange={onPlaceLetter}

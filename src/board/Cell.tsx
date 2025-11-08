@@ -15,7 +15,7 @@ type Props = {
     value: string,
     editable: boolean,
     selectable: boolean,
-    onChange: (event: React.ChangeEvent<HTMLInputElement>) => void
+    onChange: (cell: Cell, letter: string) => void
     onSelectWord: (letter: string) => void
     onSubmitWord: () => void
     onResetLetter: (e: React.MouseEvent<HTMLDivElement>) => void
@@ -33,6 +33,12 @@ const backgroundColor = (props: Props) => {
     return selectable ? ACTIONABLE_BG_COLOR : NON_ACTIONABLE_BG_COLOR;
 }
 
+const cell = (event: React.ChangeEvent<HTMLInputElement>): Cell => {
+    const id = event.target.id
+    const terms = id.split('_')
+    return [parseInt(terms[1]), parseInt(terms[2])] as Cell
+}
+
 const Cell: FC<Props> = (props) => {
     const {id, value, editable, selectable, onSelectWord, onSubmitWord, onResetLetter, onChange} = props
     const selectCell = useCallback(() => {
@@ -48,14 +54,14 @@ const Cell: FC<Props> = (props) => {
 
     if (value === '.') {
         return (
-            <div className="cell" id={id}>
+            <div className="cell" id={`div_${id}`}>
                 <input
                     className={`${TEXT_COLOR} ${editable ? ACTIONABLE_BG_COLOR : NON_ACTIONABLE_BG_COLOR}`}
-                    id={id}
+                    id={`input_${id}`}
                     type="text"
                     maxLength={1}
                     value={value === '.' ? '' : value}
-                    onChange={onChange}
+                    onChange={event => onChange(cell(event), event.target.value)}
                     disabled={!editable}
                 />
             </div>

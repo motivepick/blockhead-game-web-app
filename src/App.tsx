@@ -26,6 +26,7 @@ import ScoreBoard from './board/ScoreBoard'
 import Background from './components/Background'
 import {ACTIVE_PRIMARY_BUTTON, ACTIVE_SECONDARY_BUTTON, DISABLED_BUTTON} from "./const"
 import {useTranslation} from 'react-i18next'
+import {equals} from "./common"
 
 const SelectDifficultyDropdown = () => {
     const {t} = useTranslation()
@@ -96,8 +97,13 @@ const App = () => {
     const onResetWord = useCallback(() => {
         if (wordPath.length) {
             dispatch(resetWord());
-        } else if (lastSetLetterId) {
+        } else if (!equals(lastSetLetterId, [-1, -1])) {
             dispatch(removeLetter({cell: lastSetLetterId}))
+            setTimeout(() => {
+                const [x, y] = lastSetLetterId
+                const element = document.getElementById(`input_${x}_${y}`) as HTMLInputElement | null
+                if (element) element.focus()
+            }, 0)
         }
     }, [wordPath, dispatch, lastSetLetterId])
 

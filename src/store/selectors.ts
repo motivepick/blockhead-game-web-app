@@ -5,9 +5,9 @@ export const selectUsedWords = (state: RootState) => {
     const field = selectField(state);
     return [field[Math.floor(field.length / 2)].join('')].concat(selectWordsByUser(state)).concat(selectWordsByComputer(state));
 }
-export const selectLastSetLetterId = (state: RootState) => state.lastSetLetter.id
-export const selectWordPath = (state: RootState): string[] => state.wordPath
-export const selectComputerWordPath = (state: RootState): string[] => state.computerWordPath
+export const selectLastSetLetterId = (state: RootState): Cell => state.lastSetLetter.id
+export const selectWordPath = (state: RootState): Cell[] => state.wordPath
+export const selectComputerWordPath = (state: RootState): Cell[] => state.computerWordPath
 export const selectComputerWordPathLength = (state: RootState): number => state.computerWordPath.length
 export const selectStatus = (state: RootState): string => state.status
 export const selectFieldSize = (state: RootState): number => state.fieldSize

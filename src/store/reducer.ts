@@ -1,11 +1,34 @@
 // @ts-nocheck
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
-import { makeMove, createNewField } from '../api/service'
+import {createAsyncThunk, createSlice} from '@reduxjs/toolkit'
+import {createNewField, makeMove} from '../api/service'
 import {selectDifficulty, selectField, selectFieldSize, selectLastSetLetterId, selectWordsUsed} from "./selectors";
 
+const readFieldSize = () => {
+    try {
+        const parsed = JSON.parse(localStorage.getItem('fieldSize'));
+        console.log('parsed field size', parsed)
+        if ([3, 5, 7].includes(parsed)) {
+            return parsed
+        }
+    } catch (ignored) {
+    }
+    return 5
+}
+
+const readDifficulty = () => {
+    try {
+        const parsed = JSON.parse(localStorage.getItem('difficulty'));
+        if (['EASY', 'MEDIUM', 'HARD'].includes(parsed)) {
+            return parsed
+        }
+    } catch (ignored) {
+    }
+    return 'MEDIUM'
+}
+
 const initialState = {
-    fieldSize: 5,
-    difficulty: 'MEDIUM',
+    fieldSize: readFieldSize(),
+    difficulty: readDifficulty(),
     field: [[]],
     lastSetLetter: { id: '', value: '' },
     word: [],
@@ -20,6 +43,22 @@ const initialState = {
     status: 'IDLE',
     hinting: false
 }
+
+export const setDifficulty = createAsyncThunk(
+    'game/difficulty',
+    async (difficulty) => {
+        localStorage.setItem('difficulty', JSON.stringify(difficulty))
+        return difficulty
+    }
+)
+
+export const setFieldSize = createAsyncThunk(
+    'game/fieldSize',
+    async (fieldSize) => {
+        localStorage.setItem('fieldSize', JSON.stringify(fieldSize))
+        return fieldSize
+    }
+)
 
 export const submitUserMove = createAsyncThunk(
     'moves/user',
@@ -52,14 +91,6 @@ const gameSlice = createSlice({
     name: 'game',
     initialState,
     reducers: {
-        setDifficulty(state, action) {
-            const { difficulty } = action.payload
-            state.difficulty = difficulty
-        },
-        setFieldSize(state, action) {
-            const { fieldSize } = action.payload
-            state.fieldSize = fieldSize
-        },
         setComputerWordPath(state, {payload}) {
             state.computerWordPath = payload
         },
@@ -112,6 +143,12 @@ const gameSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
+            .addCase(setDifficulty.fulfilled, (state, action) => {
+                state.difficulty = action.payload
+            })
+            .addCase(setFieldSize.fulfilled, (state, action) => {
+                state.fieldSize = action.payload
+            })
             .addCase(submitUserMove.fulfilled, (state, action) => {
                 const word = action.payload
                 if (state.errors.length > 0) return
@@ -186,6 +223,6 @@ const checkWordAlreadyUsed = (word, usedWords) =>
 const checkUsedNewLetter = (cell, path) =>
     path.includes(cell) ? emptyError : {id: 'NoNewLetterUsed', messageKey: 'errorNewLetterUnused'}
 
-export const { setDifficulty, setFieldSize, resetHinting, resetLastSetLetter, setComputerWordPath, updateWord, placeLetter, removeLetter, resetWord } = gameSlice.actions
+export const { resetHinting, resetLastSetLetter, setComputerWordPath, updateWord, placeLetter, removeLetter, resetWord } = gameSlice.actions
 
 export default gameSlice.reducer

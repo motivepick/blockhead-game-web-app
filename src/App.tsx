@@ -38,7 +38,7 @@ const SelectDifficultyDropdown = () => {
     ]
     const onSelect = ({target}) => {
         const difficulty = target.value
-        dispatch(setDifficulty({difficulty}))
+        dispatch(setDifficulty(difficulty))
     }
     return <Dropdown defaultValue={difficulty} data={data} onSelect={onSelect}/>
 }
@@ -53,7 +53,7 @@ const SelectFieldSizeDropdown = () => {
     ]
     const onSelect = ({target}) => {
         const fieldSize = Number(target.value)
-        dispatch(setFieldSize({fieldSize}))
+        dispatch(setFieldSize(fieldSize))
     }
     return <Dropdown defaultValue={fieldSize} data={data} onSelect={onSelect}/>
 }
@@ -117,10 +117,11 @@ const App = () => {
 
     if (field[0].length <= 0) return <div>Select field size</div>
 
-    const handleSubmitWord = async () => {
+    const handleSubmitWord = () => {
         if (wordPath.length === 0 || errors.length > 0) return
         dispatch(submitUserMove())
-        dispatch(fetchComputerMove())
+            .unwrap()
+            .then(() => dispatch(fetchComputerMove()))
     }
 
     const onHint = () => dispatch(fetchHint())

@@ -42,7 +42,7 @@ const initialState = {
 
 export const setDifficulty = createAsyncThunk(
     'game/difficulty',
-    async (difficulty) => {
+    async (difficulty: string) => {
         localStorage.setItem('difficulty', JSON.stringify(difficulty))
         return difficulty
     }
@@ -50,7 +50,7 @@ export const setDifficulty = createAsyncThunk(
 
 export const setFieldSize = createAsyncThunk(
     'game/fieldSize',
-    async (fieldSize) => {
+    async (fieldSize: number) => {
         localStorage.setItem('fieldSize', JSON.stringify(fieldSize))
         return fieldSize
     }
@@ -202,12 +202,12 @@ const placeLetterOnFieldState = (state, { letter, cell }) => {
     state.field[x][y] = letter.toUpperCase()
 }
 
-const emptyError = { id: '', message: '' }
+const emptyError: UserError = { id: '', messageKey: '' }
 
-const checkWordAlreadyUsed = (word, usedWords) =>
+const checkWordAlreadyUsed: UserError = (word, usedWords) =>
     usedWords.includes(word) ? {id: 'WordAlreadyUsed', messageKey: 'errorWordIsAlreadyUsed'} : emptyError
 
-const checkUsedNewLetter = (cell, path) =>
+const checkUsedNewLetter: UserError = (cell, path) =>
     includes(path, cell) ? emptyError : {id: 'NoNewLetterUsed', messageKey: 'errorNewLetterUnused'}
 
 export const { resetHinting, resetLastSetLetter, setComputerWordPath, updateWord, placeLetter, removeLetter, resetWord } = gameSlice.actions

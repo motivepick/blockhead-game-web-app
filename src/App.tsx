@@ -1,5 +1,4 @@
-// @ts-nocheck
-import React, {useCallback, useEffect} from 'react'
+import React, {useCallback, useEffect, ChangeEvent} from 'react'
 import {useAppDispatch} from './store/hooks'
 import {
     submitUserMove,
@@ -37,7 +36,7 @@ const SelectDifficultyDropdown = () => {
         {code: 'MEDIUM', label: t('difficultyMedium')},
         {code: 'HARD', label: t('difficultyHard')}
     ]
-    const onSelect = ({target}) => {
+    const onSelect = ({target}: ChangeEvent<HTMLSelectElement>) => {
         const difficulty = target.value
         dispatch(setDifficulty(difficulty))
     }
@@ -52,14 +51,20 @@ const SelectFieldSizeDropdown = () => {
         {code: 5, label: '5 x 5'},
         {code: 7, label: '7 x 7'}
     ]
-    const onSelect = ({target}) => {
+    const onSelect = ({target}: ChangeEvent<HTMLSelectElement>) => {
         const fieldSize = Number(target.value)
         dispatch(setFieldSize(fieldSize))
     }
     return <Dropdown defaultValue={fieldSize} data={data} onSelect={onSelect}/>
 }
 
-const Dropdown = ({defaultValue, data, onSelect}) => {
+type DropdownProps<T> = {
+    defaultValue: T,
+    data: {code: T | number, label: string}[],
+    onSelect: (e: ChangeEvent<HTMLSelectElement>) => void
+}
+
+const Dropdown = ({defaultValue, data, onSelect}: DropdownProps<number | string>) => {
     const options = data.map((item, index) => (
         <option key={index} value={item.code}>
             {item.label}

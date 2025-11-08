@@ -15,4 +15,4 @@ export const selectDifficulty = (state: RootState): string => state.difficulty
 export const selectHinting = (state: RootState): boolean => state.hinting
 export const selectWordsByUser = (state: RootState): string[] => state.wordsByUser
 export const selectWordsByComputer = (state: RootState): string[] => state.wordsByComputer
-export const selectErrors = (state: RootState): string[] => state.errors
+export const selectErrors = (state: RootState): UserError[] => state.errors

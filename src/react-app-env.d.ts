@@ -5,3 +5,8 @@ type Words = string[]
 type Pair<A, B> = [A, B];
 
 type Cell = Pair<number, number>
+
+type UserError = {
+    id: string,
+    messageKey: string
+}

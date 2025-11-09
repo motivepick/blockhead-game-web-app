@@ -1,14 +1,14 @@
-import React, {useCallback, useEffect, ChangeEvent} from 'react'
+import React, {ChangeEvent, useCallback, useEffect} from 'react'
 import {useAppDispatch} from './store/hooks'
 import {
-    submitUserMove,
     fetchComputerMove,
     fetchCreateNewField,
     fetchHint,
-    removeLetter,
+    resetLastSetLetter,
     resetWord,
     setDifficulty,
     setFieldSize,
+    submitUserMove
 } from './store/reducer'
 import {useSelector} from 'react-redux'
 import {
@@ -103,7 +103,7 @@ const App = () => {
         if (wordPath.length) {
             dispatch(resetWord());
         } else if (!equals(lastSetLetterId, [-1, -1])) {
-            dispatch(removeLetter({cell: lastSetLetterId}))
+            dispatch(resetLastSetLetter())
             setTimeout(() => {
                 const [x, y] = lastSetLetterId
                 const element = document.getElementById(`input_${x}_${y}`) as HTMLInputElement | null
@@ -120,7 +120,7 @@ const App = () => {
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
             if (event.key === 'Backspace' || event.key === 'Escape') {
-                if (!hinting && (wordPath.length || lastSetLetterId)) {
+                if (!hinting) {
                     onResetWord()
                 }
             }
@@ -129,7 +129,7 @@ const App = () => {
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [hinting, wordPath, lastSetLetterId, onResetWord]);
 
-    const canReset = !hinting && (wordPath.length || lastSetLetterId)
+    const canReset = !hinting && (wordPath.length || !equals(lastSetLetterId, [-1, -1]))
 
     if (field[0].length <= 0) return <div>Select field size</div>
 
@@ -140,7 +140,11 @@ const App = () => {
             .then(() => dispatch(fetchComputerMove()))
     }
 
-    const onHint = () => dispatch(fetchHint())
+    const onHint = () => {
+        dispatch(resetLastSetLetter())
+        dispatch(resetWord())
+        dispatch(fetchHint())
+    }
 
     return (
         <Background>

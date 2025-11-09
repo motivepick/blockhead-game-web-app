@@ -112,7 +112,7 @@ const gameSlice = createSlice({
                 [checkUsedNewLetter(selectLastSetLetterId(state), state.wordPath), checkWordAlreadyUsed(word, selectUsedWords(state))]
                     .filter(it => it.id !== '')
         },
-        resetWord(state){
+        resetWord(state) {
             state.wordPath = []
         },
         resetHinting(state) {
@@ -120,7 +120,10 @@ const gameSlice = createSlice({
             state.hinting = false
         },
         resetLastSetLetter(state) {
-            state.lastSetLetter = {id: [-1, -1], value: ''}
+            if (!equals(state.lastSetLetter.id, [-1, -1])) {
+                placeLetterOnFieldState(state, { letter: '.', cell: state.lastSetLetter.id })
+                state.lastSetLetter = {id: [-1, -1], value: ''}
+            }
         },
         placeLetter(state, action) {
             state.errors = []

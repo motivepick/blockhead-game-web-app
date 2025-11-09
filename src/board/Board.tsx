@@ -16,7 +16,7 @@ import {
     selectField,
     selectFieldSize,
     selectHinting,
-    selectLastSetLetterId,
+    selectUncommittedCell,
     selectStatus,
     selectWordPath
 } from "../store/selectors"
@@ -95,7 +95,7 @@ const Board: FC<Props> = (props) => {
     const wordPath = useAppSelector(selectWordPath)
     const computerWordPath = useAppSelector(selectComputerWordPath)
     const computerWordPathLength = useAppSelector(selectComputerWordPathLength)
-    const lastSetLetterId = useAppSelector(selectLastSetLetterId)
+    const uncommittedCell = useAppSelector(selectUncommittedCell)
     const status = useAppSelector(selectStatus)
     const hinting = useAppSelector(selectHinting)
     const dispatch = useAppDispatch()
@@ -140,11 +140,11 @@ const Board: FC<Props> = (props) => {
                         <Cell
                             key={`${i}_${j}`}
                             id={`${i}_${j}`}
-                            highlightPrimary={equals(lastSetLetterId, [i, j])}
+                            highlightPrimary={equals(uncommittedCell, [i, j])}
                             highlightSecondary={includes(wordPath, [i, j]) || includes(computerWordPath.slice(0, index + 1), [i, j])}
                             value={l}
-                            editable={status !== 'PENDING' && computerWordPath.length === 0 && equals(lastSetLetterId, [-1, -1]) && hasLetterInAdjacentCell(i, j, field)}
-                            selectable={status !== 'PENDING' && computerWordPath.length === 0 && !equals(lastSetLetterId, [-1, -1]) && (wordPath.length === 0 || isAdjacentToLastSelectedCell(i, j, wordPath))}
+                            editable={status !== 'PENDING' && computerWordPath.length === 0 && equals(uncommittedCell, [-1, -1]) && hasLetterInAdjacentCell(i, j, field)}
+                            selectable={status !== 'PENDING' && computerWordPath.length === 0 && !equals(uncommittedCell, [-1, -1]) && (wordPath.length === 0 || isAdjacentToLastSelectedCell(i, j, wordPath))}
                             onSelectWord={(letter: string) => dispatch(updateWord({letter, cell: [i, j]}))}
                             onSubmitWord={onSubmitWord}
                             onResetLetter={onResetLetter}

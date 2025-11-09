@@ -5,7 +5,7 @@ export const selectUsedWords = (state: RootState) => {
     const field = selectField(state)
     return [field[Math.floor(field.length / 2)].join('')].concat(selectWordsByUser(state)).concat(selectWordsByComputer(state));
 }
-export const selectLastSetLetterId = (state: RootState): Cell => state.lastSetLetter.id
+export const selectUncommittedCell = (state: RootState): Cell => state.uncommitedCell
 export const selectWord = (state: RootState): string => {
     const field = selectField(state)
     return state.wordPath.map(([x, y]) => field[x][y]).join('')

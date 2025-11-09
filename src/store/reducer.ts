@@ -4,7 +4,7 @@ import {
     selectDifficulty,
     selectField,
     selectFieldSize,
-    selectLastSetLetterId,
+    selectUncommittedCell,
     selectUsedWords,
     selectWord
 } from "./selectors"
@@ -37,7 +37,7 @@ const initialState = {
     fieldSize: readFieldSize(),
     difficulty: readDifficulty(),
     field: [[]] as Field,
-    lastSetLetter: { id: [-1, -1] as Cell, value: '' },
+    uncommitedCell: [-1, -1] as Cell,
     wordPath: [] as Cell[],
     computerWordPath: [] as Cell[],
     wordsByUser: [] as string[],
@@ -109,39 +109,44 @@ const gameSlice = createSlice({
             state.wordPath.push(cell)
             const word = selectWord(state)
             state.errors =
-                [checkUsedNewLetter(selectLastSetLetterId(state), state.wordPath), checkWordAlreadyUsed(word, selectUsedWords(state))]
+                [checkUsedNewLetter(selectUncommittedCell(state), state.wordPath), checkWordAlreadyUsed(word, selectUsedWords(state))]
                     .filter(it => it.id !== '')
         },
+        resetHinting(state) {
+            placeLetterOnFieldState(state, { letter: '.', cell: state.uncommitedCell })
+            state.hinting = false
+        },
+        // When the user requests a hint, we should clear the user's word path and also reset uncommitedCell and remove it from the field, if any.
         resetWord(state) {
             state.wordPath = []
         },
-        resetHinting(state) {
-            placeLetterOnFieldState(state, { letter: '.', cell: state.lastSetLetter.id })
-            state.hinting = false
-        },
-        resetLastSetLetter(state) {
-            if (!equals(state.lastSetLetter.id, [-1, -1])) {
-                placeLetterOnFieldState(state, { letter: '.', cell: state.lastSetLetter.id })
-                state.lastSetLetter = {id: [-1, -1], value: ''}
+        removeUncommittedLetter(state) {
+            if (!equals(state.uncommitedCell, [-1, -1])) {
+                placeLetterOnFieldState(state, { letter: '.', cell: state.uncommitedCell })
+                state.uncommitedCell = [-1, -1]
             }
+        },
+        // Once the computer move is fulfilled, we should reset uncommitedCell to stop highlighting it, but not remove it from the field, as the computer's letter should stay.
+        resetLastSetLetter(state) {
+            state.uncommitedCell = [-1, -1]
         },
         placeLetter(state, action) {
             state.errors = []
-            const { letter, cell } = action.payload
+            const { cell } = action.payload
 
             placeLetterOnFieldState(state, action.payload)
 
-            if (!equals(state.lastSetLetter.id, [-1, -1])) {
-                placeLetterOnFieldState(state, { letter: '.', cell: selectLastSetLetterId(state) })
+            if (!equals(state.uncommitedCell, [-1, -1])) {
+                placeLetterOnFieldState(state, { letter: '.', cell: selectUncommittedCell(state) })
             }
 
-            state.lastSetLetter = { id: cell, value: letter.toUpperCase() }
+            state.uncommitedCell = cell
             state.wordPath = []
         },
         removeLetter(state, action) {
             const { cell } = action.payload
 
-            if (equals(state.lastSetLetter.id, cell)) {
+            if (equals(state.uncommitedCell, cell)) {
                 placeLetterOnFieldState(state, { letter: '.', cell })
                 resetLetterState(state)
                 state.errors = []
@@ -176,7 +181,7 @@ const gameSlice = createSlice({
                 commitWordState(state, action.payload.word, "computer")
                 state.computerWordPath = action.payload.path
                 state.status = 'SUCCEEDED'
-                state.lastSetLetter = { id: cell, value: letter.toUpperCase() }
+                state.uncommitedCell = cell
             })
             .addCase(fetchHint.fulfilled, (state, action) => {
                 const { letter, cell } = action.payload
@@ -184,7 +189,7 @@ const gameSlice = createSlice({
                 state.computerWordPath = action.payload.path.map(([x, y]) => [x, y])
 
                 placeLetterOnFieldState(state, { letter, cell })
-                state.lastSetLetter = { id: cell, value: letter.toUpperCase() }
+                state.uncommitedCell = cell
                 state.hinting = true
             })
             .addCase(fetchCreateNewField.pending, (state) => {
@@ -206,7 +211,7 @@ const commitWordState = (state: RootState, word: string, player: string) => {
 }
 
 const resetLetterState = (state: RootState) =>
-    state.lastSetLetter = { id: [-1, -1], value: '' }
+    state.uncommitedCell = [-1, -1]
 
 const placeLetterOnFieldState = (state: RootState, { letter, cell }: {letter: string, cell: Cell}) => {
     const [x, y] = cell
@@ -221,6 +226,6 @@ const checkWordAlreadyUsed = (word: string, usedWords: string[]): UserError =>
 const checkUsedNewLetter = (cell: Cell, path: Cell[]): UserError =>
     includes(path, cell) ? emptyError : {id: 'NoNewLetterUsed', messageKey: 'errorNewLetterUnused'}
 
-export const { resetHinting, resetLastSetLetter, setComputerWordPath, updateWord, placeLetter, removeLetter, resetWord } = gameSlice.actions
+export const { resetHinting, removeUncommittedLetter, resetLastSetLetter, setComputerWordPath, updateWord, placeLetter, removeLetter, resetWord } = gameSlice.actions
 
 export default gameSlice.reducer

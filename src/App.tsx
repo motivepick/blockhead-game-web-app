@@ -4,7 +4,7 @@ import {
     fetchComputerMove,
     fetchCreateNewField,
     fetchHint,
-    resetLastSetLetter,
+    removeUncommittedLetter,
     resetWord,
     setDifficulty,
     setFieldSize,
@@ -17,7 +17,7 @@ import {
     selectField,
     selectFieldSize,
     selectHinting,
-    selectLastSetLetterId,
+    selectUncommittedCell,
     selectWordPath
 } from './store/selectors'
 import Board from './board/Board'
@@ -96,16 +96,16 @@ const App = () => {
     const field = useSelector(selectField)
     const errors = useSelector(selectErrors)
     const wordPath = useSelector(selectWordPath)
-    const lastSetLetterId = useSelector(selectLastSetLetterId)
+    const uncommittedCell = useSelector(selectUncommittedCell)
     const hinting = useSelector(selectHinting)
 
     const onResetWord = useCallback(() => {
         if (wordPath.length) {
             dispatch(resetWord());
-        } else if (!equals(lastSetLetterId, [-1, -1])) {
-            dispatch(resetLastSetLetter())
+        } else if (!equals(uncommittedCell, [-1, -1])) {
+            dispatch(removeUncommittedLetter())
             setTimeout(() => {
-                const [x, y] = lastSetLetterId
+                const [x, y] = uncommittedCell
                 const element = document.getElementById(`input_${x}_${y}`) as HTMLInputElement | null
                 if (element) element.focus()
             }, 0)
@@ -115,7 +115,7 @@ const App = () => {
                 if (element) element.blur()
             }))
         }
-    }, [wordPath, dispatch, lastSetLetterId])
+    }, [wordPath, dispatch, uncommittedCell])
 
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
@@ -127,9 +127,9 @@ const App = () => {
         };
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [hinting, wordPath, lastSetLetterId, onResetWord]);
+    }, [hinting, wordPath, uncommittedCell, onResetWord]);
 
-    const canReset = !hinting && (wordPath.length || !equals(lastSetLetterId, [-1, -1]))
+    const canReset = !hinting && (wordPath.length || !equals(uncommittedCell, [-1, -1]))
 
     if (field[0].length <= 0) return <div>Select field size</div>
 
@@ -141,8 +141,8 @@ const App = () => {
     }
 
     const onHint = () => {
-        dispatch(resetLastSetLetter())
         dispatch(resetWord())
+        dispatch(removeUncommittedLetter())
         dispatch(fetchHint())
     }
 

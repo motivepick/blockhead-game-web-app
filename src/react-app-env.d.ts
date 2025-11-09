@@ -10,3 +10,11 @@ type UserError = {
     id: string,
     messageKey: string
 }
+
+type ComputerMoveResponse = {
+    cell: Cell,
+    letter: string,
+    path: Cell[],
+    word: string,
+    success: boolean
+}

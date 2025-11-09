@@ -1,6 +1,6 @@
 import api from './api'
 
-export const makeMove = async ({ field, usedWords, difficulty }: { field: Field, usedWords: Words, difficulty: string }) => {
+export const makeMove = async ({ field, usedWords, difficulty }: { field: Field, usedWords: Words, difficulty: string }): Promise<ComputerMoveResponse> => {
     const difficultyMap: { [key: string]: string } = {
         'EASY': 'Easy',
         'MEDIUM': 'Medium',
@@ -15,6 +15,7 @@ export const makeMove = async ({ field, usedWords, difficulty }: { field: Field,
         return response.data
     } catch (error) {
         console.error(error)
+        return {cell: [-1, -1], letter: '', path: [], word: '', success: false}
     }
 }
 

@@ -1,12 +1,19 @@
-// @ts-nocheck
-import {createAsyncThunk, createSlice} from '@reduxjs/toolkit'
+import {createAsyncThunk as createThunk, createSlice} from '@reduxjs/toolkit'
 import {createNewField, makeMove} from '../api/service'
-import {selectDifficulty, selectField, selectFieldSize, selectLastSetLetterId, selectUsedWords} from "./selectors"
+import {
+    selectDifficulty,
+    selectField,
+    selectFieldSize,
+    selectLastSetLetterId,
+    selectUsedWords,
+    selectWord
+} from "./selectors"
 import {equals, includes} from "../common"
+import {AppDispatch, RootState} from "./store";
 
 const readFieldSize = () => {
     try {
-        const parsed = JSON.parse(localStorage.getItem('fieldSize'));
+        const parsed = JSON.parse(localStorage.getItem('fieldSize') || '');
         if ([3, 5, 7].includes(parsed)) {
             return parsed
         }
@@ -17,7 +24,7 @@ const readFieldSize = () => {
 
 const readDifficulty = () => {
     try {
-        const parsed = JSON.parse(localStorage.getItem('difficulty'));
+        const parsed = JSON.parse(localStorage.getItem('difficulty') || '');
         if (['EASY', 'MEDIUM', 'HARD'].includes(parsed)) {
             return parsed
         }
@@ -29,16 +36,18 @@ const readDifficulty = () => {
 const initialState = {
     fieldSize: readFieldSize(),
     difficulty: readDifficulty(),
-    field: [[]],
+    field: [[]] as Field,
     lastSetLetter: { id: [-1, -1] as Cell, value: '' },
-    wordPath: [],
-    computerWordPath: [],
-    wordsByUser: [],
-    wordsByComputer: [],
-    errors: [],
+    wordPath: [] as Cell[],
+    computerWordPath: [] as Cell[],
+    wordsByUser: [] as string[],
+    wordsByComputer: [] as string[],
+    errors: [] as UserError[],
     status: 'IDLE',
     hinting: false
 }
+
+export const createAsyncThunk = createThunk.withTypes<{ state: RootState, dispatch: AppDispatch }>()
 
 export const setDifficulty = createAsyncThunk(
     'game/difficulty',
@@ -61,21 +70,26 @@ export const submitUserMove = createAsyncThunk(
     // Note: if an error happens here, it's only visible in the submitUserMove.rejected case in the extra reducers, in action.error.message
     async (_, {getState}) => {
         const state = getState()
-        return state.word.join('')
+        console.log('word is', selectWord(state))
+        return selectWord(state)
     }
 )
 
 export const fetchComputerMove = createAsyncThunk(
     'moves/computer',
-    async (word, { getState }) => {
+    async (_, {getState}) => {
         const state = getState()
-        return makeMove({ field: selectField(state), usedWords: selectUsedWords(state) , difficulty: selectDifficulty(state) })
+        return makeMove({
+            field: selectField(state),
+            usedWords: selectUsedWords(state),
+            difficulty: selectDifficulty(state)
+        })
     }
 )
 
 export const fetchHint = createAsyncThunk(
     'moves/hint',
-    async (word, { getState }) => {
+    async (_, { getState }) => {
         const state = getState()
         return makeMove({ field: selectField(state), usedWords: selectUsedWords(state), difficulty: 'HARD' })
     }
@@ -91,22 +105,18 @@ const gameSlice = createSlice({
             state.computerWordPath = payload
         },
         updateWord(state, action) {
-            const {letter, cell} = action.payload
-            state.word.push(letter)
+            const {cell} = action.payload
             state.wordPath.push(cell)
-
-            const word = state.word.join('')
+            const word = selectWord(state)
             state.errors =
                 [checkUsedNewLetter(selectLastSetLetterId(state), state.wordPath), checkWordAlreadyUsed(word, selectUsedWords(state))]
                     .filter(it => it.id !== '')
         },
         resetWord(state){
-            resetWordState(state)
             state.wordPath = []
         },
         resetHinting(state) {
             placeLetterOnFieldState(state, { letter: '.', cell: state.lastSetLetter.id })
-            state.word = []
             state.hinting = false
         },
         resetLastSetLetter(state) {
@@ -122,7 +132,6 @@ const gameSlice = createSlice({
                 placeLetterOnFieldState(state, { letter: '.', cell: selectLastSetLetterId(state) })
             }
 
-            resetWordState(state)
             state.lastSetLetter = { id: cell, value: letter.toUpperCase() }
             state.wordPath = []
         },
@@ -132,7 +141,6 @@ const gameSlice = createSlice({
             if (equals(state.lastSetLetter.id, cell)) {
                 placeLetterOnFieldState(state, { letter: '.', cell })
                 resetLetterState(state)
-                resetWordState(state)
                 state.errors = []
             }
         },
@@ -151,7 +159,6 @@ const gameSlice = createSlice({
 
                 commitWordState(state, word, "user")
 
-                resetWordState(state)
                 resetLetterState(state)
                 state.wordPath = []
             })
@@ -171,7 +178,6 @@ const gameSlice = createSlice({
             .addCase(fetchHint.fulfilled, (state, action) => {
                 const { letter, cell } = action.payload
 
-                state.word = action.payload.word.split('')
                 state.computerWordPath = action.payload.path.map(([x, y]) => [x, y])
 
                 placeLetterOnFieldState(state, { letter, cell })
@@ -188,26 +194,28 @@ const gameSlice = createSlice({
     }
 })
 
-const commitWordState = (state, word, player) => {
-    const playerWords = player === "computer" ? "wordsByComputer" : "wordsByUser"
-
-    state[playerWords].push(word)
+const commitWordState = (state: RootState, word: string, player: string) => {
+    if (player === "computer") {
+        state.wordsByComputer.push(word)
+    } else {
+        state.wordsByUser.push(word)
+    }
 }
 
-const resetWordState = (state) => state.word = []
-const resetLetterState = (state) => state.lastSetLetter = { id: [-1, -1], value: '' }
+const resetLetterState = (state: RootState) =>
+    state.lastSetLetter = { id: [-1, -1], value: '' }
 
-const placeLetterOnFieldState = (state, { letter, cell }) => {
+const placeLetterOnFieldState = (state: RootState, { letter, cell }: {letter: string, cell: Cell}) => {
     const [x, y] = cell
     state.field[x][y] = letter.toUpperCase()
 }
 
 const emptyError: UserError = { id: '', messageKey: '' }
 
-const checkWordAlreadyUsed: UserError = (word, usedWords) =>
+const checkWordAlreadyUsed = (word: string, usedWords: string[]): UserError =>
     usedWords.includes(word) ? {id: 'WordAlreadyUsed', messageKey: 'errorWordIsAlreadyUsed'} : emptyError
 
-const checkUsedNewLetter: UserError = (cell, path) =>
+const checkUsedNewLetter = (cell: Cell, path: Cell[]): UserError =>
     includes(path, cell) ? emptyError : {id: 'NoNewLetterUsed', messageKey: 'errorNewLetterUnused'}
 
 export const { resetHinting, resetLastSetLetter, setComputerWordPath, updateWord, placeLetter, removeLetter, resetWord } = gameSlice.actions

@@ -2,10 +2,14 @@ import {RootState} from "./store";
 
 export const selectField = (state: RootState) => state.field
 export const selectUsedWords = (state: RootState) => {
-    const field = selectField(state);
+    const field = selectField(state)
     return [field[Math.floor(field.length / 2)].join('')].concat(selectWordsByUser(state)).concat(selectWordsByComputer(state));
 }
 export const selectLastSetLetterId = (state: RootState): Cell => state.lastSetLetter.id
+export const selectWord = (state: RootState): string => {
+    const field = selectField(state)
+    return state.wordPath.map(([x, y]) => field[x][y]).join('')
+}
 export const selectWordPath = (state: RootState): Cell[] => state.wordPath
 export const selectComputerWordPath = (state: RootState): Cell[] => state.computerWordPath
 export const selectComputerWordPathLength = (state: RootState): number => state.computerWordPath.length

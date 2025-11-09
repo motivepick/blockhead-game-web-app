@@ -4,7 +4,7 @@ import {
     fetchComputerMove,
     fetchCreateNewField,
     fetchHint,
-    removeUncommittedLetter,
+    rollbackUncommittedCell,
     resetWord,
     setDifficulty,
     setFieldSize,
@@ -18,7 +18,7 @@ import {
     selectFieldSize,
     selectHinting,
     selectUncommittedCell,
-    selectWordPath
+    selectUncommittedUserWord
 } from './store/selectors'
 import Board from './board/Board'
 import ScoreBoard from './board/ScoreBoard'
@@ -95,15 +95,15 @@ const App = () => {
 
     const field = useSelector(selectField)
     const errors = useSelector(selectErrors)
-    const wordPath = useSelector(selectWordPath)
+    const uncommittedUserWord = useSelector(selectUncommittedUserWord)
     const uncommittedCell = useSelector(selectUncommittedCell)
     const hinting = useSelector(selectHinting)
 
     const onResetWord = useCallback(() => {
-        if (wordPath.length) {
+        if (uncommittedUserWord.length) {
             dispatch(resetWord());
         } else if (!equals(uncommittedCell, [-1, -1])) {
-            dispatch(removeUncommittedLetter())
+            dispatch(rollbackUncommittedCell())
             setTimeout(() => {
                 const [x, y] = uncommittedCell
                 const element = document.getElementById(`input_${x}_${y}`) as HTMLInputElement | null
@@ -115,7 +115,7 @@ const App = () => {
                 if (element) element.blur()
             }))
         }
-    }, [wordPath, dispatch, uncommittedCell])
+    }, [uncommittedUserWord, dispatch, uncommittedCell])
 
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
@@ -127,14 +127,14 @@ const App = () => {
         };
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [hinting, wordPath, uncommittedCell, onResetWord]);
+    }, [hinting, uncommittedUserWord, uncommittedCell, onResetWord]);
 
-    const canReset = !hinting && (wordPath.length || !equals(uncommittedCell, [-1, -1]))
+    const canReset = !hinting && (uncommittedUserWord.length || !equals(uncommittedCell, [-1, -1]))
 
     if (field[0].length <= 0) return <div>Select field size</div>
 
     const handleSubmitWord = () => {
-        if (wordPath.length === 0 || errors.length > 0) return
+        if (uncommittedUserWord.length === 0 || errors.length > 0) return
         dispatch(submitUserMove())
             .unwrap()
             .then(() => dispatch(fetchComputerMove()))
@@ -142,7 +142,7 @@ const App = () => {
 
     const onHint = () => {
         dispatch(resetWord())
-        dispatch(removeUncommittedLetter())
+        dispatch(rollbackUncommittedCell())
         dispatch(fetchHint())
     }
 
@@ -162,7 +162,7 @@ const App = () => {
                     )}
                     <br/>
                     <button
-                        className={hinting || wordPath.length === 0 || errors.length > 0 ? DISABLED_BUTTON : ACTIVE_PRIMARY_BUTTON}
+                        className={hinting || uncommittedUserWord.length === 0 || errors.length > 0 ? DISABLED_BUTTON : ACTIVE_PRIMARY_BUTTON}
                         type="button"
                         onClick={handleSubmitWord}
                         disabled={hinting}
@@ -175,7 +175,7 @@ const App = () => {
                         onClick={onResetWord}
                         disabled={!canReset}
                     >
-                        {t(wordPath.length ? 'resetChosenWord' : 'resetLetter')}
+                        {t(uncommittedUserWord.length ? 'resetChosenWord' : 'resetLetter')}
                     </button>
                     <button
                         className={hinting ? DISABLED_BUTTON : ACTIVE_SECONDARY_BUTTON}

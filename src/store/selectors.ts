@@ -8,11 +8,10 @@ export const selectUsedWords = (state: RootState) => {
 export const selectUncommittedCell = (state: RootState): Cell => state.uncommitedCell
 export const selectWord = (state: RootState): string => {
     const field = selectField(state)
-    return state.wordPath.map(([x, y]) => field[x][y]).join('')
+    return state.uncommittedUserWord.map(([x, y]) => field[x][y]).join('')
 }
-export const selectWordPath = (state: RootState): Cell[] => state.wordPath
-export const selectComputerWordPath = (state: RootState): Cell[] => state.computerWordPath
-export const selectComputerWordPathLength = (state: RootState): number => state.computerWordPath.length
+export const selectUncommittedUserWord = (state: RootState): Cell[] => state.uncommittedUserWord
+export const selectUncommittedComputerWord = (state: RootState): Cell[] => state.uncommittedComputerWord
 export const selectStatus = (state: RootState): string => state.status
 export const selectFieldSize = (state: RootState): number => state.fieldSize
 export const selectDifficulty = (state: RootState): string => state.difficulty

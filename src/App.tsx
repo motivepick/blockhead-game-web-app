@@ -109,6 +109,11 @@ const App = () => {
                 const element = document.getElementById(`input_${x}_${y}`) as HTMLInputElement | null
                 if (element) element.focus()
             }, 0)
+        } else {
+            field.forEach((row, i) => row.forEach((_, j) => {
+                const element = document.getElementById(`input_${i}_${j}`) as HTMLInputElement | null
+                if (element) element.blur()
+            }))
         }
     }, [wordPath, dispatch, lastSetLetterId])
 

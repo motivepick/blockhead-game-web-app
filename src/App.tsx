@@ -1,4 +1,5 @@
-import {ChangeEvent, useCallback, useEffect} from 'react'
+import type {ChangeEvent} from 'react'
+import {useCallback, useEffect} from 'react'
 import {useAppDispatch, useAppSelector} from './store/hooks'
 import {
     fetchComputerMove,
@@ -35,7 +36,7 @@ const SelectDifficultyDropdown = () => {
     ]
     const onSelect = ({target}: ChangeEvent<HTMLSelectElement>) => {
         const difficulty = target.value
-        dispatch(setDifficulty(difficulty))
+        void dispatch(setDifficulty(difficulty))
     }
     return <Dropdown defaultValue={difficulty} data={data} onSelect={onSelect}/>
 }
@@ -50,7 +51,7 @@ const SelectFieldSizeDropdown = () => {
     ]
     const onSelect = ({target}: ChangeEvent<HTMLSelectElement>) => {
         const fieldSize = Number(target.value)
-        dispatch(setFieldSize(fieldSize))
+        void dispatch(setFieldSize(fieldSize))
     }
     return <Dropdown defaultValue={fieldSize} data={data} onSelect={onSelect}/>
 }
@@ -87,7 +88,7 @@ export const App = () => {
     const fieldSize = useAppSelector(selectFieldSize)
 
     useEffect(() => {
-        dispatch(fetchCreateNewField(fieldSize))
+        void dispatch(fetchCreateNewField(fieldSize))
     }, [dispatch, fieldSize])
 
     const field = useAppSelector(selectField)
@@ -103,16 +104,18 @@ export const App = () => {
             dispatch(rollbackUncommittedCell())
             setTimeout(() => {
                 const [x, y] = uncommittedCell
-                const element = document.getElementById(`input_${x}_${y}`) as HTMLInputElement | null
+                const element = document.getElementById(`input_${String(x)}_${String(y)}`) as HTMLInputElement | null
                 if (element) element.focus()
             }, 0)
         } else {
-            field.forEach((row, i) => row.forEach((_, j) => {
-                const element = document.getElementById(`input_${i}_${j}`) as HTMLInputElement | null
-                if (element) element.blur()
-            }))
+            field.forEach((row, i) => {
+                row.forEach((_, j) => {
+                    const element = document.getElementById(`input_${String(i)}_${String(j)}`) as HTMLInputElement | null
+                    if (element) element.blur()
+                });
+            })
         }
-    }, [uncommittedUserWord, dispatch, uncommittedCell])
+    }, [uncommittedUserWord.length, uncommittedCell, dispatch, field])
 
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
@@ -123,7 +126,9 @@ export const App = () => {
             }
         };
         window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+        };
     }, [hinting, uncommittedUserWord, uncommittedCell, onResetWord]);
 
     const canReset = !hinting && (uncommittedUserWord.length || !equals(uncommittedCell, [-1, -1]))
@@ -132,7 +137,7 @@ export const App = () => {
 
     const handleSubmitWord = () => {
         if (uncommittedUserWord.length === 0 || errors.length > 0) return
-        dispatch(submitUserMove())
+        void dispatch(submitUserMove())
             .unwrap()
             .then(() => dispatch(fetchComputerMove()))
     }
@@ -140,7 +145,7 @@ export const App = () => {
     const onHint = () => {
         dispatch(resetWord())
         dispatch(rollbackUncommittedCell())
-        dispatch(fetchHint())
+        void dispatch(fetchHint())
     }
 
     return (
@@ -151,7 +156,7 @@ export const App = () => {
                     <br/>
                     {errors.map((error, i) =>
                         <p
-                            key={`error${i}`}
+                            key={`error${String(i)}`}
                             className="h-10 px-6 font-semibold rounded-md text-red-900 dark:text-red-400"
                         >
                             {t(error.messageKey)}

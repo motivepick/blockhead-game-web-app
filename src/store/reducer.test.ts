@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
 import reducer, {
     submitUserMove
@@ -36,6 +37,7 @@ describe('reducer', () => {
             expect(actual.wordsByUser.length).toEqual(initialState.wordsByUser.length)
             expect(actual.error).toEqual('Word already used')
         })
-        it('should use new letter in new word', () => {})
+        // eslint-disable-next-line vitest/expect-expect
+        it('should use new letter in new word', () => { /* empty */ })
     })
 })

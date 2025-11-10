@@ -34,7 +34,7 @@ const ScoreBoard = () => {
             {
                 zip(wordsByUser, wordsByComputer)
                     .map(([userWord, computerWord], i) => <tr className="border-b  dark:border-slate-600"
-                                                              key={`move${i}`}>
+                                                              key={`move${String(i)}`}>
                         <td className="text-sm text-gray-900 dark:text-gray-200 font-medium px-6 py-4 whitespace-nowrap">{userWord}</td>
                         <td className="text-sm text-gray-900 dark:text-gray-200 font-medium px-6 py-4 whitespace-nowrap">{computerWord}</td>
                     </tr>)

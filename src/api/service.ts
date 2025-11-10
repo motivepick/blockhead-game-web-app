@@ -1,7 +1,7 @@
 import api from './api'
 
 export const makeMove = async ({ field, usedWords, difficulty }: { field: Field, usedWords: Words, difficulty: string }): Promise<ComputerMoveResponse> => {
-    const difficultyMap: { [key: string]: string } = {
+    const difficultyMap: Record<string, string> = {
         'EASY': 'Easy',
         'MEDIUM': 'Medium',
         'HARD': 'Hard'
@@ -12,14 +12,14 @@ export const makeMove = async ({ field, usedWords, difficulty }: { field: Field,
             usedWords,
             difficulty: difficultyMap[difficulty] || 'Medium'
         })
-        return response.data
+        return response.data as ComputerMoveResponse
     } catch (error) {
         console.error(error)
         return {cell: [-1, -1], letter: '', path: [], word: '', success: false}
     }
 }
 
-export const createNewField = async (size: Number = 3): Promise<Field> => {
+export const createNewField = async (size = 3): Promise<Field> => {
     try {
         const response = await api.get(`/field`, {params: {size}})
         const rawField = response.data as string[]

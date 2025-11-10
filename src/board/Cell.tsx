@@ -1,4 +1,5 @@
-import {FC, useCallback, MouseEvent} from 'react'
+import type {FC, MouseEvent} from 'react';
+import { useCallback} from 'react'
 import './Board.css'
 import {
     ACTIONABLE_BG_COLOR,
@@ -41,7 +42,9 @@ const cell = (id: string): Cell => {
 const Cell: FC<Props> = (props) => {
     const {id, value, editable, selectable, onSelectWord, onSubmitWord, onResetLetter, onChange} = props
     const selectCell = useCallback(() => {
-        selectable && onSelectWord(value)
+        if (selectable) {
+            onSelectWord(value)
+        }
     }, [selectable, onSelectWord, value])
 
     const selectCellAndSubmitWord = useCallback(() => {
@@ -59,8 +62,10 @@ const Cell: FC<Props> = (props) => {
                     id={`input_${id}`}
                     type="text"
                     maxLength={1}
-                    value={value === '.' ? '' : value}
-                    onChange={event => onChange(cell(event.target.id), event.target.value)}
+                    value=""
+                    onChange={event => {
+                        onChange(cell(event.target.id), event.target.value);
+                    }}
                     disabled={!editable}
                 />
             </div>

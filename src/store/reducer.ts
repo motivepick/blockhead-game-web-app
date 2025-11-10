@@ -5,22 +5,24 @@ import { createAppSlice } from "./createAppSlice";
 
 const readFieldSize = () => {
     try {
-        const parsed = JSON.parse(localStorage.getItem('fieldSize') || '');
+        const parsed = JSON.parse(localStorage.getItem('fieldSize') ?? '') as number;
         if ([3, 5, 7].includes(parsed)) {
             return parsed
         }
-    } catch (ignored) {
+    } catch {
+        // ignored
     }
     return 5
 }
 
 const readDifficulty = () => {
     try {
-        const parsed = JSON.parse(localStorage.getItem('difficulty') || '');
+        const parsed = JSON.parse(localStorage.getItem('difficulty') ?? '') as string;
         if (['EASY', 'MEDIUM', 'HARD'].includes(parsed)) {
             return parsed
         }
-    } catch (ignored) {
+    } catch {
+        // ignored
     }
     return 'MEDIUM'
 }
@@ -58,7 +60,7 @@ export const gameSlice = createAppSlice({
     initialState,
     reducers: create => ({
         setDifficulty: create.asyncThunk(
-            async (difficulty: string) => {
+            (difficulty: string) => {
                 localStorage.setItem('difficulty', JSON.stringify(difficulty))
                 return difficulty
             },
@@ -69,7 +71,7 @@ export const gameSlice = createAppSlice({
             },
         ),
         setFieldSize: create.asyncThunk(
-            async (fieldSize: number) => {
+            (fieldSize: number) => {
                 localStorage.setItem('fieldSize', JSON.stringify(fieldSize))
                 return fieldSize
             },
@@ -81,7 +83,7 @@ export const gameSlice = createAppSlice({
         ),
         submitUserMove: create.asyncThunk(
             // Note: if an error happens here, it's only visible in the submitUserMove.rejected case in the extra reducers, in action.error.message
-            async (_, {getState}): Promise<string> => {
+            (_, {getState}): string => {
                 const state = getState() as { game: GameSliceState }
                 console.log('State is', state)
                 return gameSlice.selectors.selectWord(state)
@@ -145,7 +147,7 @@ export const gameSlice = createAppSlice({
             }
         ),
         fetchCreateNewField: create.asyncThunk(
-            async (size: Number) => createNewField(size),
+            async (size: number) => createNewField(size),
             {
                 pending: (state) => {
                     const fieldSize = gameSlice.selectors.selectFieldSize({game: state})

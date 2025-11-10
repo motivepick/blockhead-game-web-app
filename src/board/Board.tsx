@@ -1,4 +1,5 @@
-import {FC, useEffect, useState} from 'react'
+import type {FC} from 'react';
+import { useEffect, useState} from 'react'
 import './Board.css'
 import {useAppDispatch, useAppSelector} from '../store/hooks'
 import {
@@ -85,7 +86,7 @@ const latinToCyrillicMap: Record<string, string> = {
 
 const mapToAlphabet = (letter: string): string => {
     const upperCaseLetter = letter.toUpperCase();
-    return latinToCyrillicMap[upperCaseLetter as keyof Record<string, string>] || upperCaseLetter;
+    return latinToCyrillicMap[upperCaseLetter] || upperCaseLetter;
 }
 
 const Board: FC<Props> = (props) => {
@@ -124,7 +125,9 @@ const Board: FC<Props> = (props) => {
             const highlightNextCell = setTimeout(() => {
                 setIndex(index => index + 1)
             }, hinting ? COMPUTER_MOVE_HINT_HIGHLIGHT_DELAY_MS : COMPUTER_MOVE_HIGHLIGHT_DELAY_MS);
-            return () => clearTimeout(highlightNextCell);
+            return () => {
+                clearTimeout(highlightNextCell);
+            };
         }
     }, [dispatch, hinting, computerWordPathLength, index])
 
@@ -132,13 +135,13 @@ const Board: FC<Props> = (props) => {
         <div className="board-container bg-black dark:bg-gray-900"> {/* Change Board.css if changing bg-gray-900. */}
             <div
                 className="grid"
-                style={{gridTemplateColumns: `repeat(${fieldSize}, minmax(0, 1fr))`}}
+                style={{gridTemplateColumns: `repeat(${String(fieldSize)}, minmax(0, 1fr))`}}
             >
                 {
                     field.flatMap((row, i) => row.map((l, j) =>
                         <Cell
-                            key={`${i}_${j}`}
-                            id={`${i}_${j}`}
+                            key={`${String(i)}_${String(j)}`}
+                            id={`${String(i)}_${String(j)}`}
                             highlightPrimary={equals(uncommittedCell, [i, j])}
                             highlightSecondary={includes(uncommittedUserWord, [i, j]) || includes(uncommittedComputerWord.slice(0, index + 1), [i, j])}
                             value={l}

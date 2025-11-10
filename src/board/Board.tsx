@@ -19,7 +19,7 @@ import {
     selectUncommittedCell,
     selectStatus,
     selectUncommittedUserWord
-} from "../store/selectors"
+} from "../store/reducer"
 import {equals, includes} from "../common"
 
 type Props = {

@@ -1,5 +1,5 @@
 import {ChangeEvent, useCallback, useEffect} from 'react'
-import {useAppDispatch} from './store/hooks'
+import {useAppDispatch, useAppSelector} from './store/hooks'
 import {
     fetchComputerMove,
     fetchCreateNewField,
@@ -19,7 +19,7 @@ import {
     selectHinting,
     selectUncommittedCell,
     selectUncommittedUserWord
-} from './store/selectors'
+} from './store/reducer'
 import Board from './board/Board'
 import ScoreBoard from './board/ScoreBoard'
 import Background from './components/Background'
@@ -87,17 +87,17 @@ const Dropdown = ({defaultValue, data, onSelect}: DropdownProps<number | string>
 export const App = () => {
     const {t} = useTranslation()
     const dispatch = useAppDispatch()
-    const fieldSize = useSelector(selectFieldSize)
+    const fieldSize = useAppSelector(selectFieldSize)
 
     useEffect(() => {
         dispatch(fetchCreateNewField(fieldSize))
     }, [dispatch, fieldSize])
 
-    const field = useSelector(selectField)
-    const errors = useSelector(selectErrors)
-    const uncommittedUserWord = useSelector(selectUncommittedUserWord)
-    const uncommittedCell = useSelector(selectUncommittedCell)
-    const hinting = useSelector(selectHinting)
+    const field = useAppSelector(selectField)
+    const errors = useAppSelector(selectErrors)
+    const uncommittedUserWord = useAppSelector(selectUncommittedUserWord)
+    const uncommittedCell = useAppSelector(selectUncommittedCell)
+    const hinting = useAppSelector(selectHinting)
 
     const onResetWord = useCallback(() => {
         if (uncommittedUserWord.length) {

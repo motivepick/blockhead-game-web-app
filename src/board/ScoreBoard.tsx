@@ -1,6 +1,5 @@
-import React from 'react'
 import {TEXT_COLOR} from "../const"
-import {selectWordsByComputer, selectWordsByUser} from "../store/selectors"
+import {selectWordsByComputer, selectWordsByUser} from "../store/reducer"
 import {useSelector} from "react-redux"
 import {useTranslation} from "react-i18next";
 

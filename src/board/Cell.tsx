@@ -1,4 +1,4 @@
-import React, {FC, useCallback} from 'react'
+import {FC, useCallback, MouseEvent} from 'react'
 import './Board.css'
 import {
     ACTIONABLE_BG_COLOR,
@@ -18,7 +18,7 @@ type Props = {
     onChange: (cell: Cell, letter: string) => void
     onSelectWord: (letter: string) => void
     onSubmitWord: () => void
-    onResetLetter: (e: React.MouseEvent<HTMLDivElement>) => void
+    onResetLetter: (cell: Cell) => void
 }
 
 const backgroundColor = (props: Props) => {
@@ -33,8 +33,7 @@ const backgroundColor = (props: Props) => {
     return selectable ? ACTIONABLE_BG_COLOR : NON_ACTIONABLE_BG_COLOR;
 }
 
-const cell = (event: React.ChangeEvent<HTMLInputElement>): Cell => {
-    const id = event.target.id
+const cell = (id: string): Cell => {
     const terms = id.split('_')
     return [parseInt(terms[1]), parseInt(terms[2])] as Cell
 }
@@ -61,11 +60,17 @@ const Cell: FC<Props> = (props) => {
                     type="text"
                     maxLength={1}
                     value={value === '.' ? '' : value}
-                    onChange={event => onChange(cell(event), event.target.value)}
+                    onChange={event => onChange(cell(event.target.id), event.target.value)}
                     disabled={!editable}
                 />
             </div>
         )
+    }
+
+    const onContextMenu = (event: MouseEvent<HTMLDivElement>) => {
+        event.preventDefault()
+        const target = event.target as HTMLDivElement;
+        onResetLetter(cell(target.id))
     }
 
     return (
@@ -74,7 +79,7 @@ const Cell: FC<Props> = (props) => {
             id={id}
             onClick={selectCell}
             onDoubleClick={selectCellAndSubmitWord}
-            onContextMenu={onResetLetter}
+            onContextMenu={onContextMenu}
         >
             {value}
         </div>

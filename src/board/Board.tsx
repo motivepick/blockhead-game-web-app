@@ -1,4 +1,4 @@
-import React, {FC, MouseEvent, useEffect, useState} from 'react'
+import {FC, useEffect, useState} from 'react'
 import './Board.css'
 import {useAppDispatch, useAppSelector} from '../store/hooks'
 import {
@@ -107,10 +107,8 @@ const Board: FC<Props> = (props) => {
 
     const [index, setIndex] = useState(0)
 
-    const onResetLetter = (event: MouseEvent<HTMLDivElement>) => {
-        event.preventDefault()
-        const target = event.target as HTMLDivElement
-        dispatch(removeLetter({cell: target.id}))
+    const onResetLetter = (cell: Cell) => {
+        dispatch(removeLetter({cell}))
     }
 
     useEffect(() => {
@@ -146,7 +144,7 @@ const Board: FC<Props> = (props) => {
                             value={l}
                             editable={status !== 'PENDING' && uncommittedComputerWord.length === 0 && equals(uncommittedCell, [-1, -1]) && hasLetterInAdjacentCell(i, j, field)}
                             selectable={status !== 'PENDING' && uncommittedComputerWord.length === 0 && !equals(uncommittedCell, [-1, -1]) && (uncommittedUserWord.length === 0 || isAdjacentToLastSelectedCell(i, j, uncommittedUserWord))}
-                            onSelectWord={(letter: string) => dispatch(updateWord({letter, cell: [i, j]}))}
+                            onSelectWord={() => dispatch(updateWord({cell: [i, j]}))}
                             onSubmitWord={onSubmitWord}
                             onResetLetter={onResetLetter}
                             onChange={onPlaceLetter}

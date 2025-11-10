@@ -4,21 +4,18 @@ import {
     fetchComputerMove,
     fetchCreateNewField,
     fetchHint,
-    rollbackUncommittedCell,
     resetWord,
-    setDifficulty,
-    setFieldSize,
-    submitUserMove
-} from './store/reducer'
-import {useSelector} from 'react-redux'
-import {
+    rollbackUncommittedCell,
     selectDifficulty,
     selectErrors,
     selectField,
     selectFieldSize,
     selectHinting,
     selectUncommittedCell,
-    selectUncommittedUserWord
+    selectUncommittedUserWord,
+    setDifficulty,
+    setFieldSize,
+    submitUserMove
 } from './store/reducer'
 import Board from './board/Board'
 import ScoreBoard from './board/ScoreBoard'
@@ -30,7 +27,7 @@ import {equals} from "./common"
 const SelectDifficultyDropdown = () => {
     const {t} = useTranslation()
     const dispatch = useAppDispatch()
-    const difficulty = useSelector(selectDifficulty)
+    const difficulty = useAppSelector(selectDifficulty)
     const data = [
         {code: 'EASY', label: t('difficultyEasy')},
         {code: 'MEDIUM', label: t('difficultyMedium')},
@@ -45,7 +42,7 @@ const SelectDifficultyDropdown = () => {
 
 const SelectFieldSizeDropdown = () => {
     const dispatch = useAppDispatch()
-    const fieldSize = useSelector(selectFieldSize)
+    const fieldSize = useAppSelector(selectFieldSize)
     const data = [
         {code: 3, label: '3 x 3'},
         {code: 5, label: '5 x 5'},
@@ -60,7 +57,7 @@ const SelectFieldSizeDropdown = () => {
 
 type DropdownProps<T> = {
     defaultValue: T,
-    data: {code: T | number, label: string}[],
+    data: { code: T | number, label: string }[],
     onSelect: (e: ChangeEvent<HTMLSelectElement>) => void
 }
 

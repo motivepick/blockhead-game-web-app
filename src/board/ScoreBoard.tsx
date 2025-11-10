@@ -1,7 +1,7 @@
 import {TEXT_COLOR} from "../const"
 import {selectWordsByComputer, selectWordsByUser} from "../store/reducer"
-import {useSelector} from "react-redux"
 import {useTranslation} from "react-i18next";
+import {useAppSelector} from "../store/hooks.ts";
 
 const zip: (a: Words, b: Words) => Words[] = (a, b) => Array
     .from(Array(Math.max(a.length, b.length)).keys())
@@ -13,8 +13,8 @@ const score = (words: string[]) => words
 
 const ScoreBoard = () => {
     const { t } = useTranslation()
-    const wordsByUser = useSelector(selectWordsByUser)
-    const wordsByComputer = useSelector(selectWordsByComputer)
+    const wordsByUser = useAppSelector(selectWordsByUser)
+    const wordsByComputer = useAppSelector(selectWordsByComputer)
 
     return (
         <table className="min-w-full">

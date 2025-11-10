@@ -1,8 +1,7 @@
-import {createAsyncThunk as createThunk, createSlice} from '@reduxjs/toolkit'
 import {createNewField, makeMove} from '../api/service'
 import {equals, includes} from "../common"
-import type {AppDispatch} from "./store";
-import type { PayloadAction } from "@reduxjs/toolkit"
+import type {PayloadAction} from "@reduxjs/toolkit"
+import { createAppSlice } from "./createAppSlice";
 
 const readFieldSize = () => {
     try {
@@ -54,59 +53,109 @@ const initialState: GameSliceState = {
     hinting: false
 }
 
-export const createAsyncThunk = createThunk.withTypes<{ state: GameSliceState, dispatch: AppDispatch }>()
-
-export const setDifficulty = createAsyncThunk(
-    'game/difficulty',
-    async (difficulty: string) => {
-        localStorage.setItem('difficulty', JSON.stringify(difficulty))
-        return difficulty
-    }
-)
-
-export const setFieldSize = createAsyncThunk(
-    'game/fieldSize',
-    async (fieldSize: number) => {
-        localStorage.setItem('fieldSize', JSON.stringify(fieldSize))
-        return fieldSize
-    }
-)
-
-export const submitUserMove = createAsyncThunk(
-    'moves/user',
-    // Note: if an error happens here, it's only visible in the submitUserMove.rejected case in the extra reducers, in action.error.message
-    async (_, {getState}) => {
-        const state = getState()
-        return gameSlice.selectors.selectWord({game: state})
-    }
-)
-
-export const fetchComputerMove = createAsyncThunk(
-    'moves/computer',
-    async (_, {getState}) => {
-        const state = getState()
-        return makeMove({
-            field: gameSlice.selectors.selectField({game: state}),
-            usedWords: gameSlice.selectors.selectUsedWords({game: state}),
-            difficulty: gameSlice.selectors.selectDifficulty({game: state})
-        })
-    }
-)
-
-export const fetchHint = createAsyncThunk(
-    'moves/hint',
-    async (_, { getState }) => {
-        const state = getState()
-        return makeMove({ field: gameSlice.selectors.selectField({game: state}), usedWords: gameSlice.selectors.selectUsedWords({game: state}), difficulty: 'HARD' })
-    }
-)
-
-export const fetchCreateNewField = createAsyncThunk('fetchCreateNewField', async (size: Number) => createNewField(size))
-
-export const gameSlice = createSlice({
+export const gameSlice = createAppSlice({
     name: 'game',
     initialState,
     reducers: create => ({
+        setDifficulty: create.asyncThunk(
+            async (difficulty: string) => {
+                localStorage.setItem('difficulty', JSON.stringify(difficulty))
+                return difficulty
+            },
+            {
+                fulfilled: (state, action) => {
+                    state.difficulty = action.payload
+                }
+            },
+        ),
+        setFieldSize: create.asyncThunk(
+            async (fieldSize: number) => {
+                localStorage.setItem('fieldSize', JSON.stringify(fieldSize))
+                return fieldSize
+            },
+            {
+                fulfilled: (state, action) => {
+                    state.fieldSize = action.payload
+                }
+            }
+        ),
+        submitUserMove: create.asyncThunk(
+            // Note: if an error happens here, it's only visible in the submitUserMove.rejected case in the extra reducers, in action.error.message
+            async (_, {getState}): Promise<string> => {
+                const state = getState() as { game: GameSliceState }
+                console.log('State is', state)
+                return gameSlice.selectors.selectWord(state)
+            },
+            {
+                fulfilled: (state, action) => {
+                    const word = action.payload
+                    if (state.errors.length > 0) return
+
+                    commitWordState(state, word, "user")
+
+                    resetLetterState(state)
+                    state.uncommittedUserWord = []
+                }
+            }
+        ),
+        fetchComputerMove: create.asyncThunk(
+            async (_, {getState}): Promise<ComputerMoveResponse> => {
+                const state = getState() as { game: GameSliceState }
+                return makeMove({
+                    field: gameSlice.selectors.selectField(state),
+                    usedWords: gameSlice.selectors.selectUsedWords(state),
+                    difficulty: gameSlice.selectors.selectDifficulty(state)
+                })
+            },
+            {
+                pending: (state) => {
+                    state.status = 'PENDING'
+                },
+                fulfilled: (state, action) => {
+                    if (state.errors.length > 0) return
+                    const {letter, cell} = action.payload
+
+                    placeLetterOnFieldState(state, {letter, cell})
+                    commitWordState(state, action.payload.word, "computer")
+                    state.uncommittedComputerWord = action.payload.path
+                    state.status = 'SUCCEEDED'
+                    state.uncommitedCell = cell
+                }
+            }
+        ),
+        fetchHint: create.asyncThunk(
+            async (_, {getState}): Promise<ComputerMoveResponse> => {
+                const state = getState() as { game: GameSliceState }
+                return makeMove({
+                    field: gameSlice.selectors.selectField(state),
+                    usedWords: gameSlice.selectors.selectUsedWords(state),
+                    difficulty: 'HARD'
+                })
+            },
+            {
+                fulfilled: (state, action) => {
+                    const {letter, cell} = action.payload
+
+                    state.uncommittedComputerWord = action.payload.path.map(([x, y]) => [x, y])
+
+                    placeLetterOnFieldState(state, {letter, cell})
+                    state.uncommitedCell = cell
+                    state.hinting = true
+                }
+            }
+        ),
+        fetchCreateNewField: create.asyncThunk(
+            async (size: Number) => createNewField(size),
+            {
+                pending: (state) => {
+                    const fieldSize = gameSlice.selectors.selectFieldSize({game: state})
+                    state.field = Array.from({length: fieldSize}, () => Array.from({length: fieldSize}, () => '.'))
+                },
+                fulfilled: (state, action) => {
+                    state.field = action.payload
+                }
+            }
+        ),
         updateWord: create.reducer((state, action: PayloadAction<{ cell: Cell }>) => {
             const {cell} = action.payload
             state.uncommittedUserWord.push(cell)
@@ -125,7 +174,7 @@ export const gameSlice = createSlice({
         }),
         rollbackUncommittedCell: create.reducer((state) => {
             if (!equals(state.uncommitedCell, [-1, -1])) {
-                placeLetterOnFieldState(state, { letter: '.', cell: state.uncommitedCell })
+                placeLetterOnFieldState(state, {letter: '.', cell: state.uncommitedCell})
                 state.uncommitedCell = [-1, -1]
             }
         }),
@@ -138,74 +187,30 @@ export const gameSlice = createSlice({
         }),
         placeLetter: create.reducer((state, action: PayloadAction<{ letter: string, cell: Cell }>) => {
             state.errors = []
-            const { cell } = action.payload
+            const {cell} = action.payload
 
             placeLetterOnFieldState(state, action.payload)
 
             if (!equals(state.uncommitedCell, [-1, -1])) {
-                placeLetterOnFieldState(state, { letter: '.', cell: gameSlice.selectors.selectUncommittedCell({game: state}) })
+                placeLetterOnFieldState(state, {
+                    letter: '.',
+                    cell: gameSlice.selectors.selectUncommittedCell({game: state})
+                })
             }
 
             state.uncommitedCell = cell
             state.uncommittedUserWord = []
         }),
         removeLetter: create.reducer((state, action: PayloadAction<{ cell: Cell }>) => {
-            const { cell } = action.payload
+            const {cell} = action.payload
 
             if (equals(state.uncommitedCell, cell)) {
-                placeLetterOnFieldState(state, { letter: '.', cell })
+                placeLetterOnFieldState(state, {letter: '.', cell})
                 resetLetterState(state)
                 state.errors = []
             }
         }),
     }),
-    extraReducers: (builder) => {
-        builder
-            .addCase(setDifficulty.fulfilled, (state, action) => {
-                state.difficulty = action.payload
-            })
-            .addCase(setFieldSize.fulfilled, (state, action) => {
-                state.fieldSize = action.payload
-            })
-            .addCase(submitUserMove.fulfilled, (state, action) => {
-                const word = action.payload
-                if (state.errors.length > 0) return
-
-                commitWordState(state, word, "user")
-
-                resetLetterState(state)
-                state.uncommittedUserWord = []
-            })
-            .addCase(fetchComputerMove.pending, (state) => {
-                state.status = 'PENDING'
-            })
-            .addCase(fetchComputerMove.fulfilled, (state, action) => {
-                if (state.errors.length > 0) return
-                const { letter, cell } = action.payload
-
-                placeLetterOnFieldState(state, { letter, cell })
-                commitWordState(state, action.payload.word, "computer")
-                state.uncommittedComputerWord = action.payload.path
-                state.status = 'SUCCEEDED'
-                state.uncommitedCell = cell
-            })
-            .addCase(fetchHint.fulfilled, (state, action) => {
-                const { letter, cell } = action.payload
-
-                state.uncommittedComputerWord = action.payload.path.map(([x, y]) => [x, y])
-
-                placeLetterOnFieldState(state, { letter, cell })
-                state.uncommitedCell = cell
-                state.hinting = true
-            })
-            .addCase(fetchCreateNewField.pending, (state) => {
-                const fieldSize = gameSlice.selectors.selectFieldSize({game: state})
-                state.field = Array.from({ length: fieldSize }, () => Array.from({ length: fieldSize }, () => '.'))
-            })
-            .addCase(fetchCreateNewField.fulfilled, (state, action) => {
-                state.field = action.payload
-            })
-    },
     selectors: {
         selectField: (state: GameSliceState) => state.field,
         selectUsedWords: (state: GameSliceState) => {
@@ -240,12 +245,12 @@ const commitWordState = (state: GameSliceState, word: string, player: string) =>
 const resetLetterState = (state: GameSliceState) =>
     state.uncommitedCell = [-1, -1]
 
-const placeLetterOnFieldState = (state: GameSliceState, { letter, cell }: {letter: string, cell: Cell}) => {
+const placeLetterOnFieldState = (state: GameSliceState, {letter, cell}: { letter: string, cell: Cell }) => {
     const [x, y] = cell
     state.field[x][y] = letter.toUpperCase()
 }
 
-const emptyError: UserError = { id: '', messageKey: '' }
+const emptyError: UserError = {id: '', messageKey: ''}
 
 const checkWordAlreadyUsed = (word: string, usedWords: string[]): UserError =>
     usedWords.includes(word) ? {id: 'WordAlreadyUsed', messageKey: 'errorWordIsAlreadyUsed'} : emptyError
@@ -253,8 +258,37 @@ const checkWordAlreadyUsed = (word: string, usedWords: string[]): UserError =>
 const checkUsedNewLetter = (cell: Cell, path: Cell[]): UserError =>
     includes(path, cell) ? emptyError : {id: 'NoNewLetterUsed', messageKey: 'errorNewLetterUnused'}
 
-export const { resetHinting, rollbackUncommittedCell, commitUncommittedCell, resetUncommittedComputerWord, updateWord, placeLetter, removeLetter, resetWord } = gameSlice.actions
+export const {
+    setDifficulty,
+    setFieldSize,
+    submitUserMove,
+    fetchComputerMove,
+    fetchHint,
+    fetchCreateNewField,
+    resetHinting,
+    rollbackUncommittedCell,
+    commitUncommittedCell,
+    resetUncommittedComputerWord,
+    updateWord,
+    placeLetter,
+    removeLetter,
+    resetWord
+} = gameSlice.actions
 
-export const { selectField, selectUsedWords, selectUncommittedCell, selectWord, selectUncommittedUserWord, selectUncommittedComputerWord, selectStatus, selectFieldSize, selectDifficulty, selectHinting, selectWordsByUser, selectWordsByComputer, selectErrors } = gameSlice.selectors
+export const {
+    selectField,
+    selectUsedWords,
+    selectUncommittedCell,
+    selectWord,
+    selectUncommittedUserWord,
+    selectUncommittedComputerWord,
+    selectStatus,
+    selectFieldSize,
+    selectDifficulty,
+    selectHinting,
+    selectWordsByUser,
+    selectWordsByComputer,
+    selectErrors
+} = gameSlice.selectors
 
 export default gameSlice.reducer

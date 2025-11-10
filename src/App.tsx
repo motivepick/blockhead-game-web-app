@@ -1,4 +1,4 @@
-import React, {ChangeEvent, useCallback, useEffect} from 'react'
+import {ChangeEvent, useCallback, useEffect} from 'react'
 import {useAppDispatch} from './store/hooks'
 import {
     fetchComputerMove,
@@ -84,7 +84,7 @@ const Dropdown = ({defaultValue, data, onSelect}: DropdownProps<number | string>
     )
 }
 
-const App = () => {
+export const App = () => {
     const {t} = useTranslation()
     const dispatch = useAppDispatch()
     const fieldSize = useSelector(selectFieldSize)
@@ -195,5 +195,3 @@ const App = () => {
         </Background>
     )
 }
-
-export default App

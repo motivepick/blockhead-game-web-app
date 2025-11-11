@@ -1,21 +1,22 @@
-import type {FC, MouseEvent} from 'react';
-import { useCallback} from 'react'
+import type { FC, MouseEvent } from 'react'
+import { useCallback } from 'react'
 import './Board.css'
 import {
     ACTIONABLE_BG_COLOR,
     HIGHLIGHTED_SECONDARY_BG_COLOR,
     HIGHLIGHTED_PRIMARY_BG_COLOR,
     NON_ACTIONABLE_BG_COLOR,
-    TEXT_COLOR, HIGHLIGHTED_MIXED_BG_COLOR
-} from "../const";
+    TEXT_COLOR,
+    HIGHLIGHTED_MIXED_BG_COLOR
+} from '../const'
 
 type Props = {
-    id: string,
-    highlightPrimary: boolean,
-    highlightSecondary: boolean,
-    value: string,
-    editable: boolean,
-    selectable: boolean,
+    id: string
+    highlightPrimary: boolean
+    highlightSecondary: boolean
+    value: string
+    editable: boolean
+    selectable: boolean
     onChange: (cell: Cell, letter: string) => void
     onSelectWord: (letter: string) => void
     onSubmitWord: () => void
@@ -23,7 +24,7 @@ type Props = {
 }
 
 const backgroundColor = (props: Props) => {
-    const {highlightPrimary, highlightSecondary, selectable} = props
+    const { highlightPrimary, highlightSecondary, selectable } = props
     if (highlightPrimary && highlightSecondary) {
         return HIGHLIGHTED_MIXED_BG_COLOR
     } else if (highlightPrimary) {
@@ -31,7 +32,7 @@ const backgroundColor = (props: Props) => {
     } else if (highlightSecondary) {
         return HIGHLIGHTED_SECONDARY_BG_COLOR
     }
-    return selectable ? ACTIONABLE_BG_COLOR : NON_ACTIONABLE_BG_COLOR;
+    return selectable ? ACTIONABLE_BG_COLOR : NON_ACTIONABLE_BG_COLOR
 }
 
 const cell = (id: string): Cell => {
@@ -39,8 +40,8 @@ const cell = (id: string): Cell => {
     return [parseInt(terms[1]), parseInt(terms[2])] as Cell
 }
 
-const Cell: FC<Props> = (props) => {
-    const {id, value, editable, selectable, onSelectWord, onSubmitWord, onResetLetter, onChange} = props
+const Cell: FC<Props> = props => {
+    const { id, value, editable, selectable, onSelectWord, onSubmitWord, onResetLetter, onChange } = props
     const selectCell = useCallback(() => {
         if (selectable) {
             onSelectWord(value)
@@ -64,7 +65,7 @@ const Cell: FC<Props> = (props) => {
                     maxLength={1}
                     value=""
                     onChange={event => {
-                        onChange(cell(event.target.id), event.target.value);
+                        onChange(cell(event.target.id), event.target.value)
                     }}
                     disabled={!editable}
                 />
@@ -74,7 +75,7 @@ const Cell: FC<Props> = (props) => {
 
     const onContextMenu = (event: MouseEvent<HTMLDivElement>) => {
         event.preventDefault()
-        const target = event.target as HTMLDivElement;
+        const target = event.target as HTMLDivElement
         onResetLetter(cell(target.id))
     }
 

@@ -1,7 +1,7 @@
-import type { GameSliceState } from './reducer'
-import { gameSlice, selectDifficulty, selectFieldSize, setDifficulty, setFieldSize } from './reducer'
-import type { AppStore } from './store.ts'
-import { makeStore } from './store.ts'
+import type { GameSliceState } from '../reducer.ts'
+import { gameSlice, selectDifficulty, selectFieldSize, setDifficulty, setFieldSize } from '../reducer.ts'
+import type { AppStore } from '../store.ts'
+import { makeStore } from '../store.ts'
 
 type LocalTestContext = {
     store: AppStore

@@ -44,13 +44,13 @@ export type GameSliceState = {
 const initialState: GameSliceState = {
     fieldSize: readFieldSize(),
     difficulty: readDifficulty(),
-    field: [[]] as Field,
-    uncommitedCell: [-1, -1] as Cell,
-    uncommittedUserWord: [] as Cell[],
-    uncommittedComputerWord: [] as Cell[],
-    wordsByUser: [] as string[],
-    wordsByComputer: [] as string[],
-    errors: [] as UserError[],
+    field: [[]],
+    uncommitedCell: [-1, -1],
+    uncommittedUserWord: [],
+    uncommittedComputerWord: [],
+    wordsByUser: [],
+    wordsByComputer: [],
+    errors: [],
     status: 'IDLE',
     hinting: false
 }
@@ -85,7 +85,6 @@ export const gameSlice = createAppSlice({
             // Note: if an error happens here, it's only visible in the submitUserMove.rejected case in the extra reducers, in action.error.message
             (_, { getState }): string => {
                 const state = getState() as { game: GameSliceState }
-                console.log('State is', state)
                 return gameSlice.selectors.selectWord(state)
             },
             {

@@ -1,43 +1,60 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
-import reducer, { submitUserMove } from './reducer'
+import type { GameSliceState } from './reducer'
+import { gameSlice, selectDifficulty, selectFieldSize, setDifficulty, setFieldSize } from './reducer'
+import type { AppStore } from './store.ts'
+import { makeStore } from './store.ts'
 
-describe('reducer', () => {
-    // const initialState: CounterState = {
-    //   value: 3,
-    //   status: 'idle',
-    // };
-    const initialState = {
-        field: [[]],
-        lastSetLetter: { id: '', value: '' },
-        word: [],
-        wordsByUser: ['word1', 'word4'],
-        wordsByComputer: ['word2', 'word3']
-    }
+type LocalTestContext = {
+    store: AppStore
+}
+
+describe('counter reducer', () => {
+    beforeEach<LocalTestContext>(context => {
+        const initialState: GameSliceState = {
+            fieldSize: 5,
+            difficulty: 'MEDIUM',
+            field: [[]],
+            uncommitedCell: [-1, -1],
+            uncommittedUserWord: [],
+            uncommittedComputerWord: [],
+            wordsByUser: [],
+            wordsByComputer: [],
+            errors: [],
+            status: 'IDLE',
+            hinting: false
+        }
+
+        context.store = makeStore({ game: initialState })
+    })
 
     it('should handle initial state', () => {
-        expect(reducer(undefined, { type: 'unknown' })).toEqual({
+        expect(gameSlice.reducer(undefined, { type: 'unknown' })).toStrictEqual({
+            fieldSize: 5,
+            difficulty: 'MEDIUM',
             field: [[]],
-            lastSetLetter: { id: '', value: '' },
-            word: [],
+            uncommitedCell: [-1, -1],
+            uncommittedUserWord: [],
+            uncommittedComputerWord: [],
             wordsByUser: [],
-            wordsByComputer: []
+            wordsByComputer: [],
+            errors: [],
+            status: 'IDLE',
+            hinting: false
         })
     })
-    describe('submitUserMove', () => {
-        it('should handle submitUserMove', () => {
-            const actual = reducer(initialState, submitUserMove({ word: 'ABC' }))
-            expect(actual.wordsByUser.at(-1)).toEqual('ABC')
-            expect(actual.wordsByUser.at(-1)).toEqual('ABC')
-        })
-        it('should not accept already used word', () => {
-            const actual = reducer(initialState, submitUserMove({ word: 'word3' }))
-            expect(actual.wordsByUser.length).toEqual(initialState.wordsByUser.length)
-            expect(actual.error).toEqual('Word already used')
-        })
-        // eslint-disable-next-line vitest/expect-expect
-        it('should use new letter in new word', () => {
-            /* empty */
-        })
+
+    it<LocalTestContext>('should set difficulty', async ({ store }) => {
+        expect(selectDifficulty(store.getState())).toBe('MEDIUM')
+
+        await store.dispatch(setDifficulty('EASY'))
+
+        expect(selectDifficulty(store.getState())).toBe('EASY')
+    })
+
+    it<LocalTestContext>('should set field size', async ({ store }) => {
+        expect(selectFieldSize(store.getState())).toBe(5)
+
+        await store.dispatch(setFieldSize(3))
+
+        expect(selectFieldSize(store.getState())).toBe(3)
     })
 })

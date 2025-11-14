@@ -23,3 +23,5 @@ Or push to the master branch and GitHub Actions will deploy it automatically.
 
 Before pushing, consider running `set -x CI true; npm run build` (in Fish) to ensure the build will succeed in GitHub
 Actions.
+
+You can also run tests with `npm test`.

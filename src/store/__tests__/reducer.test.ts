@@ -1,7 +1,22 @@
 import type { GameSliceState } from '../reducer.ts'
-import { gameSlice, selectDifficulty, selectFieldSize, setDifficulty, setFieldSize } from '../reducer.ts'
+import {
+    fetchCreateNewField,
+    gameSlice,
+    placeLetter,
+    resetUncommittedUserWord,
+    rollbackUncommittedCell,
+    selectDifficulty,
+    selectErrors,
+    selectField,
+    selectFieldSize,
+    selectWord,
+    setDifficulty,
+    setFieldSize,
+    updateWord
+} from '../reducer.ts'
 import type { AppStore } from '../store.ts'
 import { makeStore } from '../store.ts'
+import api from '../../api/service'
 
 type LocalTestContext = {
     store: AppStore
@@ -56,5 +71,37 @@ describe('counter reducer', () => {
         await store.dispatch(setFieldSize(3))
 
         expect(selectFieldSize(store.getState())).toBe(3)
+    })
+
+    it<LocalTestContext>('should reset uncommitted user word and uncommitted cell', async ({ store }) => {
+        const field: Field = [
+            ['.', '.', '.', '.', '.'],
+            ['.', '.', '.', '.', '.'],
+            ['F', 'I', 'E', 'L', 'D'],
+            ['.', '.', '.', '.', '.'],
+            ['.', '.', '.', '.', '.']
+        ]
+        api.createNewField = vi.fn(() => Promise.resolve(field))
+
+        expect(selectFieldSize(store.getState())).toBe(5)
+        await store.dispatch(fetchCreateNewField(selectFieldSize(store.getState())))
+        store.dispatch(placeLetter({ cell: [3, 1], letter: 'F' }))
+        store.dispatch(updateWord({ cell: [3, 1] }))
+        store.dispatch(updateWord({ cell: [2, 1] }))
+        store.dispatch(updateWord({ cell: [2, 2] }))
+        store.dispatch(updateWord({ cell: [2, 3] }))
+        store.dispatch(updateWord({ cell: [2, 4] }))
+
+        expect(selectWord(store.getState())).toBe('FIELD')
+        expect(selectErrors(store.getState())).toStrictEqual([
+            { id: 'WordAlreadyUsed', messageKey: 'errorWordIsAlreadyUsed' }
+        ])
+
+        store.dispatch(resetUncommittedUserWord())
+        expect(selectWord(store.getState())).toBe('')
+        expect(selectErrors(store.getState())).toStrictEqual([])
+
+        store.dispatch(rollbackUncommittedCell())
+        expect(selectField(store.getState())).toStrictEqual(field)
     })
 })

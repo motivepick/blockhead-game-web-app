@@ -1,4 +1,4 @@
-import { createNewField, makeMove } from '../api/service'
+import api from '../api/service'
 import { equals, includes } from '../common'
 import type { PayloadAction } from '@reduxjs/toolkit'
 import { createAppSlice } from './createAppSlice'
@@ -102,7 +102,7 @@ export const gameSlice = createAppSlice({
         fetchComputerMove: create.asyncThunk(
             async (_, { getState }): Promise<ComputerMoveResponse> => {
                 const state = getState() as { game: GameSliceState }
-                return makeMove({
+                return api.makeMove({
                     field: gameSlice.selectors.selectField(state),
                     usedWords: gameSlice.selectors.selectUsedWords(state),
                     difficulty: gameSlice.selectors.selectDifficulty(state)
@@ -127,7 +127,7 @@ export const gameSlice = createAppSlice({
         fetchHint: create.asyncThunk(
             async (_, { getState }): Promise<ComputerMoveResponse> => {
                 const state = getState() as { game: GameSliceState }
-                return makeMove({
+                return api.makeMove({
                     field: gameSlice.selectors.selectField(state),
                     usedWords: gameSlice.selectors.selectUsedWords(state),
                     difficulty: 'HARD'
@@ -145,7 +145,7 @@ export const gameSlice = createAppSlice({
                 }
             }
         ),
-        fetchCreateNewField: create.asyncThunk(async (size: number) => createNewField(size), {
+        fetchCreateNewField: create.asyncThunk(async (size: number) => api.createNewField(size), {
             pending: state => {
                 const fieldSize = gameSlice.selectors.selectFieldSize({ game: state })
                 state.field = Array.from({ length: fieldSize }, () => Array.from({ length: fieldSize }, () => '.'))
@@ -159,7 +159,10 @@ export const gameSlice = createAppSlice({
             state.uncommittedUserWord.push(cell)
             const word = gameSlice.selectors.selectWord({ game: state })
             state.errors = [
-                checkUsedNewLetter(gameSlice.selectors.selectUncommittedCell({ game: state }), state.uncommittedUserWord),
+                checkUsedNewLetter(
+                    gameSlice.selectors.selectUncommittedCell({ game: state }),
+                    state.uncommittedUserWord
+                ),
                 checkWordAlreadyUsed(word, gameSlice.selectors.selectUsedWords({ game: state }))
             ].filter(it => it.id !== '')
         }),
@@ -168,7 +171,8 @@ export const gameSlice = createAppSlice({
         }),
         // When the user requests a hint, we should clear the user's word path and, if there is an uncommitted cell, rollback it to remove it from the field,
         // only then we can fetch the hint with the actual field state.
-        resetWord: create.reducer(state => {
+        resetUncommittedUserWord: create.reducer(state => {
+            state.errors = []
             state.uncommittedUserWord = []
         }),
         rollbackUncommittedCell: create.reducer(state => {
@@ -214,7 +218,9 @@ export const gameSlice = createAppSlice({
         selectField: (state: GameSliceState) => state.field,
         selectUsedWords: (state: GameSliceState) => {
             const field = state.field
-            return [field[Math.floor(field.length / 2)].join('')].concat(state.wordsByUser).concat(state.wordsByComputer)
+            return [field[Math.floor(field.length / 2)].join('')]
+                .concat(state.wordsByUser)
+                .concat(state.wordsByComputer)
         },
         selectUncommittedCell: (state: GameSliceState): Cell => state.uncommitedCell,
         selectWord: (state: GameSliceState): string => {
@@ -270,7 +276,7 @@ export const {
     updateWord,
     placeLetter,
     removeLetter,
-    resetWord
+    resetUncommittedUserWord
 } = gameSlice.actions
 
 export const {

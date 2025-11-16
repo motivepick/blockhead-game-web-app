@@ -5,7 +5,7 @@ import {
     fetchComputerMove,
     fetchCreateNewField,
     fetchHint,
-    resetWord,
+    resetUncommittedUserWord,
     rollbackUncommittedCell,
     selectDifficulty,
     selectErrors,
@@ -99,7 +99,7 @@ export const App = () => {
 
     const onResetWord = useCallback(() => {
         if (uncommittedUserWord.length) {
-            dispatch(resetWord())
+            dispatch(resetUncommittedUserWord())
         } else if (!equals(uncommittedCell, [-1, -1])) {
             dispatch(rollbackUncommittedCell())
             setTimeout(() => {
@@ -143,7 +143,7 @@ export const App = () => {
     }
 
     const onHint = () => {
-        dispatch(resetWord())
+        dispatch(resetUncommittedUserWord())
         dispatch(rollbackUncommittedCell())
         void dispatch(fetchHint())
     }

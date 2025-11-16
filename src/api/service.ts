@@ -1,6 +1,6 @@
-import api from './api'
+import instance from './axios.ts'
 
-export const makeMove = async ({
+const makeMove = async ({
     field,
     usedWords,
     difficulty
@@ -15,7 +15,7 @@ export const makeMove = async ({
         HARD: 'Hard'
     }
     try {
-        const response = await api.post('/move-requests', {
+        const response = await instance.post('/move-requests', {
             field: field.map(row => row.join('')),
             usedWords,
             difficulty: difficultyMap[difficulty] || 'Medium'
@@ -27,9 +27,9 @@ export const makeMove = async ({
     }
 }
 
-export const createNewField = async (size = 3): Promise<Field> => {
+const createNewField = async (size = 3): Promise<Field> => {
     try {
-        const response = await api.get(`/field`, { params: { size } })
+        const response = await instance.get(`/field`, { params: { size } })
         const rawField = response.data as string[]
         return rawField.map(row => row.split(''))
     } catch (error) {
@@ -37,3 +37,7 @@ export const createNewField = async (size = 3): Promise<Field> => {
         return [[]] as Field
     }
 }
+
+const api = {makeMove, createNewField}
+
+export default api

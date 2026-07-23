@@ -1,4 +1,4 @@
-import type { FC } from 'react'
+import type { CSSProperties, FC } from 'react'
 import { useEffect, useState } from 'react'
 import './Board.css'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
@@ -37,7 +37,8 @@ const adjacentCells = (i: number, j: number): Cell[] => [
     [i, j + 1]
 ]
 
-const hasLetterInAdjacentCell = (i: number, j: number, field: string[][]): boolean => adjacentCells(i, j).some(([x, y]) => field[x]?.[y] && field[x][y] !== '.')
+const hasLetterInAdjacentCell = (i: number, j: number, field: string[][]): boolean =>
+    adjacentCells(i, j).some(([x, y]) => field[x]?.[y] && field[x][y] !== '.')
 
 const isAdjacentToLastSelectedCell = (i: number, j: number, uncommittedUserWord: Cell[]): boolean => {
     if (uncommittedUserWord.length) {
@@ -137,16 +138,18 @@ const Board: FC<Props> = props => {
     }, [dispatch, hinting, computerWordPathLength, index])
 
     return (
-        <div className="board-container bg-black dark:bg-gray-900">
-            {/* Change Board.css if changing bg-gray-900. */}
-            <div className="grid" style={{ gridTemplateColumns: `repeat(${String(fieldSize)}, minmax(0, 1fr))` }}>
+        <div className="board-frame">
+            <div className="board-grid" data-size={fieldSize} style={{ '--field-size': fieldSize } as CSSProperties}>
                 {field.flatMap((row, i) =>
                     row.map((l, j) => (
                         <Cell
                             key={`${String(i)}_${String(j)}`}
                             id={`${String(i)}_${String(j)}`}
                             highlightPrimary={equals(uncommittedCell, [i, j])}
-                            highlightSecondary={includes(uncommittedUserWord, [i, j]) || includes(uncommittedComputerWord.slice(0, index + 1), [i, j])}
+                            highlightSecondary={
+                                includes(uncommittedUserWord, [i, j]) ||
+                                includes(uncommittedComputerWord.slice(0, index + 1), [i, j])
+                            }
                             value={l}
                             editable={
                                 status !== 'PENDING' &&
@@ -158,7 +161,8 @@ const Board: FC<Props> = props => {
                                 status !== 'PENDING' &&
                                 uncommittedComputerWord.length === 0 &&
                                 !equals(uncommittedCell, [-1, -1]) &&
-                                (uncommittedUserWord.length === 0 || isAdjacentToLastSelectedCell(i, j, uncommittedUserWord))
+                                (uncommittedUserWord.length === 0 ||
+                                    isAdjacentToLastSelectedCell(i, j, uncommittedUserWord))
                             }
                             onSelectWord={() => dispatch(updateWord({ cell: [i, j] }))}
                             onSubmitWord={onSubmitWord}

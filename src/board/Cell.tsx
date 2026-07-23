@@ -1,14 +1,6 @@
 import type { FC, MouseEvent } from 'react'
 import { useCallback } from 'react'
 import './Board.css'
-import {
-    ACTIONABLE_BG_COLOR,
-    HIGHLIGHTED_SECONDARY_BG_COLOR,
-    HIGHLIGHTED_PRIMARY_BG_COLOR,
-    NON_ACTIONABLE_BG_COLOR,
-    TEXT_COLOR,
-    HIGHLIGHTED_MIXED_BG_COLOR
-} from '../const'
 
 type Props = {
     id: string
@@ -26,18 +18,18 @@ type Props = {
 const backgroundColor = (props: Props) => {
     const { highlightPrimary, highlightSecondary, selectable } = props
     if (highlightPrimary && highlightSecondary) {
-        return HIGHLIGHTED_MIXED_BG_COLOR
+        return 'board-cell--highlight-mixed'
     } else if (highlightPrimary) {
-        return HIGHLIGHTED_PRIMARY_BG_COLOR
+        return 'board-cell--highlight-primary'
     } else if (highlightSecondary) {
-        return HIGHLIGHTED_SECONDARY_BG_COLOR
+        return 'board-cell--highlight-secondary'
     }
-    return selectable ? ACTIONABLE_BG_COLOR : NON_ACTIONABLE_BG_COLOR
+    return selectable ? 'board-cell--actionable' : 'board-cell--muted'
 }
 
 const cell = (id: string): Cell => {
     const terms = id.split('_')
-    return [parseInt(terms[1]), parseInt(terms[2])] as Cell
+    return [parseInt(terms.at(-2) ?? ''), parseInt(terms.at(-1) ?? '')]
 }
 
 const Cell: FC<Props> = props => {
@@ -57,13 +49,14 @@ const Cell: FC<Props> = props => {
 
     if (value === '.') {
         return (
-            <div className="cell" id={`div_${id}`}>
+            <div className="board-cell-slot" id={`div_${id}`}>
                 <input
-                    className={`${TEXT_COLOR} ${editable ? ACTIONABLE_BG_COLOR : NON_ACTIONABLE_BG_COLOR}`}
+                    className={`board-cell board-cell-input ${editable ? 'board-cell--actionable' : 'board-cell--muted'}`}
                     id={`input_${id}`}
                     type="text"
                     maxLength={1}
                     value=""
+                    autoComplete="off"
                     onChange={event => {
                         onChange(cell(event.target.id), event.target.value)
                     }}
@@ -81,7 +74,7 @@ const Cell: FC<Props> = props => {
 
     return (
         <div
-            className={`cell user-select-none ${TEXT_COLOR} ${backgroundColor(props)} ${selectable ? 'selectable' : ''}`}
+            className={`board-cell user-select-none ${backgroundColor(props)} ${selectable ? 'board-cell--selectable' : ''}`}
             id={id}
             onClick={selectCell}
             onDoubleClick={selectCellAndSubmitWord}

@@ -161,6 +161,7 @@ const Board: FC<Props> = props => {
                                 status !== 'PENDING' &&
                                 uncommittedComputerWord.length === 0 &&
                                 !equals(uncommittedCell, [-1, -1]) &&
+                                !includes(uncommittedUserWord, [i, j]) &&
                                 (uncommittedUserWord.length === 0 ||
                                     isAdjacentToLastSelectedCell(i, j, uncommittedUserWord))
                             }

@@ -11,9 +11,12 @@ import {
     selectErrors,
     selectField,
     selectFieldSize,
+    selectHasGameProgress,
     selectHinting,
+    selectIsBusy,
     selectStatus,
     selectUncommittedCell,
+    selectUncommittedComputerWord,
     selectUncommittedUserWord,
     setDifficulty,
     setFieldSize,
@@ -24,9 +27,13 @@ import ScoreBoard from './board/ScoreBoard'
 import Background from './components/Background'
 import { ACTIVE_HINT_BUTTON, ACTIVE_PRIMARY_BUTTON, ACTIVE_SECONDARY_BUTTON, DISABLED_BUTTON } from './const'
 import { useTranslation } from 'react-i18next'
-import { equals } from './common'
+import { equals, isFieldOfSize } from './common'
 
-const SelectDifficultyDropdown = () => {
+type SettingsControlProps = {
+    disabled: boolean
+}
+
+const SelectDifficultyDropdown = ({ disabled }: SettingsControlProps) => {
     const { t } = useTranslation()
     const dispatch = useAppDispatch()
     const difficulty = useAppSelector(selectDifficulty)
@@ -39,10 +46,23 @@ const SelectDifficultyDropdown = () => {
         const difficulty = target.value
         void dispatch(setDifficulty(difficulty))
     }
-    return <Dropdown id="difficulty" label={t('difficultyLabel')} value={difficulty} data={data} onSelect={onSelect} />
+    return (
+        <Dropdown
+            id="difficulty"
+            label={t('difficultyLabel')}
+            value={difficulty}
+            data={data}
+            onSelect={onSelect}
+            disabled={disabled}
+        />
+    )
 }
 
-const SelectFieldSizeDropdown = () => {
+type SelectFieldSizeDropdownProps = SettingsControlProps & {
+    confirmDiscardProgress: () => boolean
+}
+
+const SelectFieldSizeDropdown = ({ disabled, confirmDiscardProgress }: SelectFieldSizeDropdownProps) => {
     const { t } = useTranslation()
     const dispatch = useAppDispatch()
     const fieldSize = useAppSelector(selectFieldSize)
@@ -52,10 +72,21 @@ const SelectFieldSizeDropdown = () => {
         { code: 7, label: '7 x 7' }
     ]
     const onSelect = ({ target }: ChangeEvent<HTMLSelectElement>) => {
-        const fieldSize = Number(target.value)
-        void dispatch(setFieldSize(fieldSize))
+        const selectedFieldSize = Number(target.value)
+        if (selectedFieldSize === fieldSize || !confirmDiscardProgress()) return
+
+        void dispatch(setFieldSize(selectedFieldSize))
     }
-    return <Dropdown id="field-size" label={t('fieldSizeLabel')} value={fieldSize} data={data} onSelect={onSelect} />
+    return (
+        <Dropdown
+            id="field-size"
+            label={t('fieldSizeLabel')}
+            value={fieldSize}
+            data={data}
+            onSelect={onSelect}
+            disabled={disabled}
+        />
+    )
 }
 
 type DropdownProps = {
@@ -64,9 +95,10 @@ type DropdownProps = {
     value: number | string
     data: { code: number | string; label: string }[]
     onSelect: (e: ChangeEvent<HTMLSelectElement>) => void
+    disabled: boolean
 }
 
-const Dropdown = ({ id, label, value, data, onSelect }: DropdownProps) => {
+const Dropdown = ({ id, label, value, data, onSelect, disabled }: DropdownProps) => {
     const options = data.map((item, index) => (
         <option key={index} value={item.code}>
             {item.label}
@@ -78,9 +110,10 @@ const Dropdown = ({ id, label, value, data, onSelect }: DropdownProps) => {
             <span className="text-sm font-medium text-slate-600 dark:text-slate-300">{label}</span>
             <select
                 id={id}
-                className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm font-semibold text-slate-800 shadow-sm outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:border-indigo-400 dark:focus:ring-indigo-500/20"
+                className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm font-semibold text-slate-800 shadow-sm outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:border-indigo-400 dark:focus:ring-indigo-500/20"
                 onChange={onSelect}
                 value={value}
+                disabled={disabled}
             >
                 {options}
             </select>
@@ -92,17 +125,22 @@ export const App = () => {
     const { t } = useTranslation()
     const dispatch = useAppDispatch()
     const fieldSize = useAppSelector(selectFieldSize)
-
-    useEffect(() => {
-        void dispatch(fetchCreateNewField(fieldSize))
-    }, [dispatch, fieldSize])
-
     const field = useAppSelector(selectField)
     const errors = useAppSelector(selectErrors)
     const uncommittedUserWord = useAppSelector(selectUncommittedUserWord)
+    const uncommittedComputerWord = useAppSelector(selectUncommittedComputerWord)
     const uncommittedCell = useAppSelector(selectUncommittedCell)
     const hinting = useAppSelector(selectHinting)
     const status = useAppSelector(selectStatus)
+    const gameIsBusy = useAppSelector(selectIsBusy)
+    const hasGameProgress = useAppSelector(selectHasGameProgress)
+    const fieldIsReady = isFieldOfSize(field, fieldSize)
+
+    useEffect(() => {
+        if (!fieldIsReady && !gameIsBusy && status !== 'FAILED') {
+            void dispatch(fetchCreateNewField(fieldSize))
+        }
+    }, [dispatch, fieldIsReady, fieldSize, gameIsBusy, status])
 
     const onResetWord = useCallback(() => {
         if (uncommittedUserWord.length) {
@@ -141,12 +179,24 @@ export const App = () => {
     }, [hinting, uncommittedUserWord, uncommittedCell, onResetWord])
 
     const computerIsThinking = status === 'PENDING'
-    const canSubmit = !hinting && !computerIsThinking && uncommittedUserWord.length > 0 && errors.length === 0
+    const startingNewGame = status === 'CREATING'
+    const findingHint = status === 'HINT_PENDING'
+    const gameFailed = status === 'FAILED'
+    const computerMoveAnimating = uncommittedComputerWord.length > 0
+    const interactionLocked = gameIsBusy || hinting || computerMoveAnimating
+    const settingsDisabled = interactionLocked
+    const canSubmit = !interactionLocked && !gameFailed && uncommittedUserWord.length > 0 && errors.length === 0
     const canReset =
-        !hinting && !computerIsThinking && (uncommittedUserWord.length > 0 || !equals(uncommittedCell, [-1, -1]))
-    const canHint = !hinting && !computerIsThinking
+        !interactionLocked && !gameFailed && (uncommittedUserWord.length > 0 || !equals(uncommittedCell, [-1, -1]))
+    const canHint = !interactionLocked && !gameFailed
+    const canStartNewGame = !settingsDisabled
 
-    if (!field[0]?.length) {
+    const confirmDiscardProgress = useCallback(
+        () => !hasGameProgress || window.confirm(t('confirmNewGame')),
+        [hasGameProgress, t]
+    )
+
+    if (!fieldIsReady) {
         return (
             <Background>
                 <main className="flex min-h-screen items-center justify-center px-4">
@@ -172,7 +222,23 @@ export const App = () => {
         void dispatch(fetchHint())
     }
 
-    const statusLabel = hinting ? t('hintingStatus') : computerIsThinking ? t('computerThinking') : t('yourTurn')
+    const onNewGame = () => {
+        if (!canStartNewGame || !confirmDiscardProgress()) return
+        void dispatch(fetchCreateNewField(fieldSize))
+    }
+
+    const statusLabel = findingHint
+        ? t('findingHint')
+        : hinting
+          ? t('hintingStatus')
+          : startingNewGame
+            ? t('startingNewGame')
+            : computerIsThinking
+              ? t('computerThinking')
+              : gameFailed
+                ? t('gameUnavailable')
+                : t('yourTurn')
+    const statusColor = gameIsBusy ? 'animate-pulse bg-amber-400' : gameFailed ? 'bg-rose-500' : 'bg-emerald-500'
 
     return (
         <Background>
@@ -201,9 +267,7 @@ export const App = () => {
                         className="inline-flex w-fit items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm backdrop-blur dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200"
                         aria-live="polite"
                     >
-                        <span
-                            className={`size-2 rounded-full ${computerIsThinking ? 'animate-pulse bg-amber-400' : 'bg-emerald-500'}`}
-                        />
+                        <span className={`size-2 rounded-full ${statusColor}`} />
                         {statusLabel}
                     </div>
                 </header>
@@ -267,8 +331,21 @@ export const App = () => {
                                 {t('settingsTitle')}
                             </h2>
                             <div className="mt-4 space-y-4">
-                                <SelectDifficultyDropdown />
-                                <SelectFieldSizeDropdown />
+                                <SelectDifficultyDropdown disabled={settingsDisabled} />
+                                <SelectFieldSizeDropdown
+                                    disabled={settingsDisabled}
+                                    confirmDiscardProgress={confirmDiscardProgress}
+                                />
+                            </div>
+                            <div className="mt-5 border-t border-slate-200 pt-4 dark:border-slate-800">
+                                <button
+                                    className={canStartNewGame ? ACTIVE_SECONDARY_BUTTON : DISABLED_BUTTON}
+                                    type="button"
+                                    onClick={onNewGame}
+                                    disabled={!canStartNewGame}
+                                >
+                                    {t('newGame')}
+                                </button>
                             </div>
                         </section>
 

@@ -24,6 +24,8 @@ type LocalTestContext = {
 
 describe('counter reducer', () => {
     beforeEach<LocalTestContext>(context => {
+        localStorage.clear()
+
         const initialState: GameSliceState = {
             fieldSize: 5,
             difficulty: 'MEDIUM',

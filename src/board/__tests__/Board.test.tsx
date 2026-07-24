@@ -1,6 +1,10 @@
-import { fireEvent } from '@testing-library/react'
+import { act, fireEvent } from '@testing-library/react'
 import type { GameSliceState } from '../../store/reducer'
-import { selectUncommittedUserWord } from '../../store/reducer'
+import {
+    resetUncommittedComputerWord,
+    selectUncommittedComputerWord,
+    selectUncommittedUserWord
+} from '../../store/reducer'
 import { renderWithProviders } from '../../utils/test-utils'
 import Board from '../Board'
 
@@ -41,4 +45,44 @@ test('does not allow selecting a cell already in the current word', () => {
         [1, 0],
         [1, 1]
     ])
+})
+
+test('stops the highlight animation if its path is cleared', () => {
+    vi.useFakeTimers()
+    const initialState: GameSliceState = {
+        fieldSize: 3,
+        difficulty: 'MEDIUM',
+        field: [
+            ['A', '.', '.'],
+            ['B', '.', '.'],
+            ['.', '.', '.']
+        ],
+        uncommitedCell: [0, 0],
+        uncommittedUserWord: [],
+        uncommittedComputerWord: [
+            [0, 0],
+            [1, 0]
+        ],
+        wordsByUser: ['A'],
+        wordsByComputer: ['AB'],
+        errors: [],
+        status: 'SUCCEEDED',
+        hinting: false
+    }
+    const { store, unmount } = renderWithProviders(<Board onSubmitWord={vi.fn()} />, {
+        preloadedState: { game: initialState }
+    })
+
+    act(() => {
+        vi.advanceTimersByTime(300)
+    })
+    act(() => {
+        store.dispatch(resetUncommittedComputerWord())
+    })
+
+    expect(selectUncommittedComputerWord(store.getState())).toStrictEqual([])
+    expect(vi.getTimerCount()).toBe(0)
+
+    unmount()
+    vi.useRealTimers()
 })

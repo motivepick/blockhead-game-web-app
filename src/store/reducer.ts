@@ -1,7 +1,8 @@
 import api from '../api/service'
-import { equals, includes } from '../common'
+import { equals, includes, isFieldOfSize } from '../common'
 import type { PayloadAction } from '@reduxjs/toolkit'
 import { createAppSlice } from './createAppSlice'
+import { readSavedGame } from './persistence'
 
 const readFieldSize = () => {
     try {
@@ -37,23 +38,30 @@ export type GameSliceState = {
     wordsByUser: string[]
     wordsByComputer: string[]
     errors: UserError[]
-    status: 'IDLE' | 'PENDING' | 'SUCCEEDED' | 'FAILED'
+    status: 'IDLE' | 'PENDING' | 'CREATING' | 'HINT_PENDING' | 'SUCCEEDED' | 'FAILED'
     hinting: boolean
 }
 
-const initialState: GameSliceState = {
-    fieldSize: readFieldSize(),
-    difficulty: readDifficulty(),
-    field: [[]],
-    uncommitedCell: [-1, -1],
-    uncommittedUserWord: [],
-    uncommittedComputerWord: [],
-    wordsByUser: [],
-    wordsByComputer: [],
-    errors: [],
-    status: 'IDLE',
-    hinting: false
+export const createInitialState = (): GameSliceState => {
+    const fieldSize = readFieldSize()
+    const savedGame = readSavedGame(fieldSize)
+
+    return {
+        fieldSize,
+        difficulty: readDifficulty(),
+        field: savedGame?.field ?? [[]],
+        uncommitedCell: [-1, -1],
+        uncommittedUserWord: [],
+        uncommittedComputerWord: [],
+        wordsByUser: savedGame?.wordsByUser ?? [],
+        wordsByComputer: savedGame?.wordsByComputer ?? [],
+        errors: [],
+        status: 'IDLE',
+        hinting: false
+    }
 }
+
+const initialState = createInitialState()
 
 export const gameSlice = createAppSlice({
     name: 'game',
@@ -134,6 +142,9 @@ export const gameSlice = createAppSlice({
                 })
             },
             {
+                pending: state => {
+                    state.status = 'HINT_PENDING'
+                },
                 fulfilled: (state, action) => {
                     const { letter, cell } = action.payload
 
@@ -142,18 +153,36 @@ export const gameSlice = createAppSlice({
                     placeLetterOnFieldState(state, { letter, cell })
                     state.uncommitedCell = cell
                     state.hinting = true
+                    state.status = 'SUCCEEDED'
+                },
+                rejected: state => {
+                    state.status = 'IDLE'
                 }
             }
         ),
-        fetchCreateNewField: create.asyncThunk(async (size: number) => api.createNewField(size), {
-            pending: state => {
-                const fieldSize = gameSlice.selectors.selectFieldSize({ game: state })
-                state.field = Array.from({ length: fieldSize }, () => Array.from({ length: fieldSize }, () => '.'))
+        fetchCreateNewField: create.asyncThunk(
+            async (size: number) => {
+                const field = await api.createNewField(size)
+                if (!isFieldOfSize(field, size)) {
+                    throw new Error(`Could not create a valid ${String(size)} x ${String(size)} field.`)
+                }
+                return field
             },
-            fulfilled: (state, action) => {
-                state.field = action.payload
+            {
+                pending: state => {
+                    const fieldSize = gameSlice.selectors.selectFieldSize({ game: state })
+                    resetGameProgressState(state, createEmptyField(fieldSize))
+                    state.status = 'CREATING'
+                },
+                fulfilled: (state, action) => {
+                    state.field = action.payload
+                    state.status = 'IDLE'
+                },
+                rejected: state => {
+                    state.status = 'FAILED'
+                }
             }
-        }),
+        ),
         updateWord: create.reducer((state, action: PayloadAction<{ cell: Cell }>) => {
             const { cell } = action.payload
             state.uncommittedUserWord.push(cell)
@@ -230,14 +259,37 @@ export const gameSlice = createAppSlice({
         selectUncommittedUserWord: (state: GameSliceState): Cell[] => state.uncommittedUserWord,
         selectUncommittedComputerWord: (state: GameSliceState): Cell[] => state.uncommittedComputerWord,
         selectStatus: (state: GameSliceState): string => state.status,
+        selectIsBusy: (state: GameSliceState): boolean =>
+            state.status === 'PENDING' || state.status === 'CREATING' || state.status === 'HINT_PENDING',
         selectFieldSize: (state: GameSliceState): number => state.fieldSize,
         selectDifficulty: (state: GameSliceState): string => state.difficulty,
         selectHinting: (state: GameSliceState): boolean => state.hinting,
         selectWordsByUser: (state: GameSliceState): string[] => state.wordsByUser,
         selectWordsByComputer: (state: GameSliceState): string[] => state.wordsByComputer,
-        selectErrors: (state: GameSliceState): UserError[] => state.errors
+        selectErrors: (state: GameSliceState): UserError[] => state.errors,
+        selectHasGameProgress: (state: GameSliceState): boolean =>
+            state.wordsByUser.length > 0 ||
+            state.wordsByComputer.length > 0 ||
+            state.uncommittedUserWord.length > 0 ||
+            !equals(state.uncommitedCell, [-1, -1])
     }
 })
+
+function createEmptyField(size: number): Field {
+    return Array.from({ length: size }, () => Array.from({ length: size }, () => '.'))
+}
+
+function resetGameProgressState(state: GameSliceState, field: Field) {
+    state.field = field
+    state.uncommitedCell = [-1, -1]
+    state.uncommittedUserWord = []
+    state.uncommittedComputerWord = []
+    state.wordsByUser = []
+    state.wordsByComputer = []
+    state.errors = []
+    state.status = 'IDLE'
+    state.hinting = false
+}
 
 const commitWordState = (state: GameSliceState, word: string, player: string) => {
     if (player === 'computer') {
@@ -287,12 +339,14 @@ export const {
     selectUncommittedUserWord,
     selectUncommittedComputerWord,
     selectStatus,
+    selectIsBusy,
     selectFieldSize,
     selectDifficulty,
     selectHinting,
     selectWordsByUser,
     selectWordsByComputer,
-    selectErrors
+    selectErrors,
+    selectHasGameProgress
 } = gameSlice.selectors
 
 export default gameSlice.reducer

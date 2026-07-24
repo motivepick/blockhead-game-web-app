@@ -17,8 +17,8 @@ import {
     selectField,
     selectFieldSize,
     selectHinting,
+    selectIsBusy,
     selectUncommittedCell,
-    selectStatus,
     selectUncommittedUserWord
 } from '../store/reducer'
 import { equals, includes } from '../common'
@@ -97,7 +97,7 @@ const Board: FC<Props> = props => {
     const uncommittedComputerWord = useAppSelector(selectUncommittedComputerWord)
     const computerWordPathLength = uncommittedComputerWord.length
     const uncommittedCell = useAppSelector(selectUncommittedCell)
-    const status = useAppSelector(selectStatus)
+    const gameIsBusy = useAppSelector(selectIsBusy)
     const hinting = useAppSelector(selectHinting)
     const dispatch = useAppDispatch()
 
@@ -116,7 +116,7 @@ const Board: FC<Props> = props => {
     }
 
     useEffect(() => {
-        if (index === computerWordPathLength) {
+        if (index >= computerWordPathLength) {
             if (hinting) {
                 dispatch(resetHinting())
                 dispatch(rollbackUncommittedCell())
@@ -152,13 +152,13 @@ const Board: FC<Props> = props => {
                             }
                             value={l}
                             editable={
-                                status !== 'PENDING' &&
+                                !gameIsBusy &&
                                 uncommittedComputerWord.length === 0 &&
                                 equals(uncommittedCell, [-1, -1]) &&
                                 hasLetterInAdjacentCell(i, j, field)
                             }
                             selectable={
-                                status !== 'PENDING' &&
+                                !gameIsBusy &&
                                 uncommittedComputerWord.length === 0 &&
                                 !equals(uncommittedCell, [-1, -1]) &&
                                 !includes(uncommittedUserWord, [i, j]) &&

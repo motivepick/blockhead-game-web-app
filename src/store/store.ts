@@ -1,18 +1,41 @@
-import { combineSlices, configureStore } from '@reduxjs/toolkit'
+import { combineSlices, configureStore, createListenerMiddleware, isAnyOf } from '@reduxjs/toolkit'
 import type { Action, ThunkAction } from '@reduxjs/toolkit'
-import { gameSlice } from './reducer'
+import { fetchComputerMove, fetchCreateNewField, gameSlice } from './reducer'
+import { clearSavedGame, saveCompletedGame } from './persistence'
 
 const rootReducer = combineSlices(gameSlice)
 
 export type RootState = ReturnType<typeof rootReducer>
 
+const createPersistenceMiddleware = () => {
+    const listenerMiddleware = createListenerMiddleware()
+
+    listenerMiddleware.startListening({
+        actionCreator: fetchCreateNewField.pending,
+        effect: () => {
+            clearSavedGame()
+        }
+    })
+
+    listenerMiddleware.startListening({
+        matcher: isAnyOf(fetchCreateNewField.fulfilled, fetchComputerMove.fulfilled),
+        effect: (_, listenerApi) => {
+            saveCompletedGame((listenerApi.getState() as RootState).game)
+        }
+    })
+
+    return listenerMiddleware.middleware
+}
+
 // The store setup is wrapped in `makeStore` to allow reuse
 // when setting up tests that need the same store config
 export const makeStore = (preloadedState?: Partial<RootState>) => {
+    const persistenceMiddleware = createPersistenceMiddleware()
+
     return configureStore({
         reducer: rootReducer,
         middleware: getDefaultMiddleware => {
-            return getDefaultMiddleware()
+            return getDefaultMiddleware().prepend(persistenceMiddleware)
         },
         preloadedState
     })

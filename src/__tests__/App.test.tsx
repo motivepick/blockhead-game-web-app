@@ -78,3 +78,21 @@ test('asks for confirmation before changing the board size with progress', async
     expect(confirm).toHaveBeenCalledOnce()
     expect(boardSize).toHaveValue('5')
 })
+
+test('disables hints when the field is full', () => {
+    renderWithProviders(<App />, {
+        preloadedState: {
+            game: createState({
+                field: [
+                    ['A', 'B', 'C', 'D', 'E'],
+                    ['F', 'G', 'H', 'I', 'J'],
+                    ['K', 'L', 'M', 'N', 'O'],
+                    ['P', 'Q', 'R', 'S', 'T'],
+                    ['U', 'V', 'W', 'X', 'Y']
+                ]
+            })
+        }
+    })
+
+    expect(screen.getByRole('button', { name: 'Hint' })).toBeDisabled()
+})

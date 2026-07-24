@@ -135,6 +135,7 @@ export const App = () => {
     const gameIsBusy = useAppSelector(selectIsBusy)
     const hasGameProgress = useAppSelector(selectHasGameProgress)
     const fieldIsReady = isFieldOfSize(field, fieldSize)
+    const fieldHasEmptyCell = field.some(row => row.includes('.'))
 
     useEffect(() => {
         if (!fieldIsReady && !gameIsBusy && status !== 'FAILED') {
@@ -188,7 +189,7 @@ export const App = () => {
     const canSubmit = !interactionLocked && !gameFailed && uncommittedUserWord.length > 0 && errors.length === 0
     const canReset =
         !interactionLocked && !gameFailed && (uncommittedUserWord.length > 0 || !equals(uncommittedCell, [-1, -1]))
-    const canHint = !interactionLocked && !gameFailed
+    const canHint = !interactionLocked && !gameFailed && fieldHasEmptyCell
     const canStartNewGame = !settingsDisabled
 
     const confirmDiscardProgress = useCallback(
